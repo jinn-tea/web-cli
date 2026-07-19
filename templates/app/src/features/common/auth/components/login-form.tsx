@@ -63,6 +63,15 @@ export function LoginForm() {
         submitLabel={t("auth.login.submit")}
         className="justify-stretch [&>button]:w-full"
       />
+      <p className="text-caption text-muted-foreground text-center">
+        {t("auth.login.noAccount")}{" "}
+        <Link
+          href={AUTH_ROUTES.register}
+          className="underline underline-offset-4"
+        >
+          {t("auth.login.signUp")}
+        </Link>
+      </p>
     </form>
   );
 }

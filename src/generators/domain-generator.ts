@@ -2,14 +2,12 @@ import fs from "fs-extra";
 import path from "node:path";
 import {
   addArrayElement,
-  addCatalogNamespace,
   addExportStar,
   addNamedImport,
   addObjectProperty,
   createProject,
   openFile,
   removeArrayElement,
-  removeCatalogNamespace,
   removeExportStar,
   removeNamedImport,
   removeObjectProperty,
@@ -216,21 +214,29 @@ export async function generateDomain(
     "api.ts endpoint index",
   );
 
+  await tsProject.save();
+
   // 3. Seed every locale catalog. Non-source catalogs get TODO markers so an
   //    untranslated string is visible rather than silently English.
+  //
+  //    Done as TEXT, deliberately: routing this through ts-morph reformats the
+  //    whole catalog and drops the blank line between namespaces, so a later
+  //    edit shows a change nobody made. The role generator takes the same path
+  //    for the same reason.
   for (const [index, locale] of config.locales.entries()) {
     const catalogPath = path.join(root, `src/i18n/messages/${locale}.ts`);
     if (!(await fs.pathExists(catalogPath))) continue;
 
-    const catalog = openFile(tsProject, catalogPath);
     const marker = index === 0 ? "" : `TODO(${locale}): `;
     note(
-      addCatalogNamespace(catalog, names.camelName, catalogNamespace(names, marker)),
+      await addTextNamespace(
+        catalogPath,
+        names.camelName,
+        catalogNamespace(names, marker),
+      ),
       `i18n ${locale}.${names.camelName}`,
     );
   }
-
-  await tsProject.save();
 
   // ts-morph writes valid but not canonically-formatted TypeScript; Prettier
   // makes the diff minimal and keeps round-trips exact.
@@ -289,14 +295,16 @@ export async function removeDomain(
     "api.ts endpoint index",
   );
 
+  await tsProject.save();
+
   for (const locale of config.locales) {
     const catalogPath = path.join(root, `src/i18n/messages/${locale}.ts`);
     if (!(await fs.pathExists(catalogPath))) continue;
-    const catalog = openFile(tsProject, catalogPath);
-    note(removeCatalogNamespace(catalog, names.camelName), `i18n ${locale}`);
+    note(
+      await removeTextNamespace(catalogPath, names.camelName),
+      `i18n ${locale}`,
+    );
   }
-
-  await tsProject.save();
   await formatTouchedFiles(root, tsProject.getSourceFiles().map((f) => f.getFilePath()));
 
   // 2. Delete the domain's files last, so a failure above leaves them intact.
@@ -334,4 +342,56 @@ async function formatTouchedFiles(
     }),
   );
   void root;
+}
+
+/**
+ * Add a top-level namespace to a message catalog, as text.
+ *
+ * Kept off ts-morph on purpose: its formatter rewrites the whole file and
+ * collapses the blank line that separates one namespace from the next, so the
+ * next edit reports a change nobody made. Inserted before the catalog's closing
+ * brace, with a preceding blank line to match the file's existing rhythm.
+ */
+async function addTextNamespace(
+  filePath: string,
+  key: string,
+  objectText: string,
+): Promise<boolean> {
+  const text = await fs.readFile(filePath, "utf8");
+  if (new RegExp(`^  ${key}:`, "m").test(text)) return false;
+
+  const closing = text.lastIndexOf("\n};");
+  if (closing === -1) return false;
+
+  const block = `\n\n  ${key}: ${objectText},`;
+  const updated = text.slice(0, closing) + block + text.slice(closing);
+  await fs.writeFile(filePath, await formatSource(updated, filePath), "utf8");
+  return true;
+}
+
+/** Remove a top-level namespace, taking its preceding blank line with it. */
+async function removeTextNamespace(
+  filePath: string,
+  key: string,
+): Promise<boolean> {
+  const text = await fs.readFile(filePath, "utf8");
+  const start = new RegExp(`\n\n?  ${key}: \\{`).exec(text);
+  if (!start) return false;
+
+  // Walk braces to find the namespace's end — a regex can't match nesting.
+  let depth = 0;
+  let index = text.indexOf("{", start.index);
+  for (; index < text.length; index += 1) {
+    if (text[index] === "{") depth += 1;
+    else if (text[index] === "}") {
+      depth -= 1;
+      if (depth === 0) break;
+    }
+  }
+  let end = index + 1;
+  if (text[end] === ",") end += 1;
+
+  const updated = text.slice(0, start.index) + text.slice(end);
+  await fs.writeFile(filePath, await formatSource(updated, filePath), "utf8");
+  return true;
 }

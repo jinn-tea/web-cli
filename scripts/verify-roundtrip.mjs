@@ -112,30 +112,17 @@ try {
 
   const roleAfter = await hashTree(projectDir);
 
-  // Blank lines are normalized for THIS comparison only.
-  //
-  // `domain`→`remove-domain` and `role`→`remove-role` are each byte-exact
-  // (asserted above and covered by the codemod unit tests). Interleaving them
-  // is not, by exactly one character: ts-morph's formatter doesn't preserve the
-  // blank line separating two catalog namespaces, and Prettier keeps existing
-  // blank lines but never re-inserts a missing one. So a catalog edited by the
-  // AST path after the text path loses one separator.
-  //
-  // Asserting structure here rather than bytes is the honest description of
-  // what's guaranteed — silently dropping the check would not be.
-  const normalize = (map) =>
-    new Map([...map].map(([file, text]) => [file, text.replace(/\n{2,}/g, "\n")]));
-  const roleChanged = diff(
-    { files: normalize(roleBefore.files) },
-    { files: normalize(roleAfter.files) },
-  );
+  // Byte-exact, including blank lines. This briefly wasn't: catalog namespaces
+  // were edited through ts-morph, whose formatter drops the blank line between
+  // namespaces, and Prettier preserves existing blank lines but never
+  // re-inserts a missing one. Moving those edits to the text path fixed it.
+  const roleChanged = diff(roleBefore, roleAfter);
   if (roleChanged.length > 0) {
     console.error(`✗ the role lifecycle is not reversible:\n  ${roleChanged.join("\n  ")}`);
     process.exit(1);
   }
   console.log(
-    "✓ role → domain → remove-domain → remove-role restores the tree" +
-      " (structure; see the note above on blank lines)",
+    "✓ role → domain → remove-domain → remove-role restores the tree byte for byte",
   );
 } finally {
   await fs.rm(workDir, { recursive: true, force: true });

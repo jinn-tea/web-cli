@@ -4,6 +4,9 @@ A Node/TypeScript CLI that scaffolds and grows production-ready Next.js (App Rou
 Codeable web architecture — the web counterpart to the Codeable Flutter CLI, matched command-for-
 command and deliberately better where that one is weak.
 
+> Not published to npm yet — install from the repo:
+> `npm i -g github:jinn-tea/web-cli`
+
 ```bash
 npx codeable-web-cli create my-app --roles admin,member --locales en,de --brand "#2563EB"
 ```
@@ -27,7 +30,7 @@ box — and `create` verifies that itself before handing the project over.
 | **M1** — engine + `create` | ✅ working end to end |
 | **M2** — `domain` + `doctor` | ✅ complete |
 | **M3** — `role`, `component`, `dialog`, `add-locale`, `rename` | ✅ complete |
-| **M4** — guardrails, adoption, v1.0.0 | 🚧 `guardrails` done; publish pending |
+| **M4** — guardrails, adoption, v1.0.0 | ✅ complete — publish deferred by choice |
 
 ## What `create` produces
 

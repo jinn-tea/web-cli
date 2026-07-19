@@ -2,9 +2,14 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { DEFAULT_AUTHED_ROUTE } from "@/constants";
-import { login } from "@/lib/auth";
+import { AUTH_ENDPOINTS, login } from "@/lib/auth";
+import { backendClient } from "@/lib/http";
 import { useApiMutation } from "@/lib/mutations";
-import type { LoginInput } from "@/features/common/auth/validations/auth.schema";
+import type {
+  ForgotPasswordInput,
+  LoginInput,
+  RegisterInput,
+} from "@/features/common/auth/validations/auth.schema";
 
 /**
  * Auth mutations.
@@ -34,5 +39,35 @@ export function useLogin() {
           : DEFAULT_AUTHED_ROUTE;
       router.replace(target);
     },
+  });
+}
+
+export function useRegister() {
+  const router = useRouter();
+
+  return useApiMutation<void, RegisterInput>({
+    mutationFn: async (input) => {
+      await backendClient.post(AUTH_ENDPOINTS.register, input, { auth: false });
+      // Sign in straight away — asking someone to type the credentials they
+      // just chose is friction with no security benefit.
+      await login({ email: input.email, password: input.password });
+    },
+    successMessage: "auth.login.success",
+    reportScope: "auth.register",
+    onSuccess: () => router.replace(DEFAULT_AUTHED_ROUTE),
+  });
+}
+
+export function useForgotPassword() {
+  return useApiMutation<void, ForgotPasswordInput>({
+    mutationFn: async (input) => {
+      await backendClient.post(AUTH_ENDPOINTS.forgotPassword, input, {
+        auth: false,
+      });
+    },
+    // No toast: the screen swaps to a "check your inbox" state, and saying
+    // more would reveal whether the address exists.
+    showErrorToast: false,
+    reportScope: "auth.forgotPassword",
   });
 }

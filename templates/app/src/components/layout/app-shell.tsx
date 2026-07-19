@@ -9,6 +9,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { CommandMenu } from "@/components/shared/command-menu";
 import { LanguageSwitcher } from "@/components/shared/language-switcher";
 import { clientEnv } from "@/config/env";
 import { useTranslations } from "@/i18n";
@@ -63,6 +64,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </Sheet>
 
           <div className="flex-1" />
+          {/* Mounted here so ⌘K works from any authed screen. */}
+          <CommandMenu />
           <LanguageSwitcher />
           <UserMenu />
         </header>
