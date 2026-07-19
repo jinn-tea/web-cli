@@ -86,25 +86,25 @@ async function runDomain(
 
   ui.intro(`jinn-web domain ${input}`);
 
-  const role = await resolveRole(
-    allRoles(project.config),
-    flags.role,
-    flags.pickRole,
-  );
+  // A roleless project has nowhere to put a role, so don't ask for one.
+  const role = project.config.roles.length
+    ? await resolveRole(allRoles(project.config), flags.role, flags.pickRole)
+    : "";
   const names = deriveNames(input, role);
   const paths = domainFilePaths(names);
+  const label = role ? `${role}/${names.name}` : names.name;
 
   if (!flags.force && (await fs.pathExists(path.join(project.root, paths.dir)))) {
     // Re-running is safe (the wiring codemods no-op), but overwriting a
     // domain's FILES would discard hand-written code — so that needs consent,
     // and the non-interactive default is "no".
     const overwrite = await ui.askConfirm(
-      `Domain ${pc.cyan(`${role}/${names.name}`)} already exists. Overwrite its files?`,
+      `Domain ${pc.cyan(label)} already exists. Overwrite its files?`,
     );
     if (!overwrite) ui.fail("Cancelled — nothing was changed. Pass --force to overwrite.");
   }
 
-  const result = await ui.step(`Generating ${role}/${names.name}`, () =>
+  const result = await ui.step(`Generating ${label}`, () =>
     generateDomain(project, names, { withPage: flags.page !== false }),
   );
 
@@ -121,8 +121,8 @@ async function runDomain(
       `${result.created.length} files created.`,
       "",
       `  ${pc.dim("Navigate:")}  <Link href={APP_ROUTES.${names.camelName}}>`,
-      `  ${pc.dim("Entity:")}    edit src/features/${role}/${names.name}/types/index.ts`,
-      `  ${pc.dim("Endpoints:")} edit src/features/${role}/${names.name}/constants.ts`,
+      `  ${pc.dim("Entity:")}    edit ${paths.dir}/types/index.ts`,
+      `  ${pc.dim("Endpoints:")} edit ${paths.dir}/constants.ts`,
       `  ${pc.dim("Check:")}     jinn-web doctor`,
     ].join("\n"),
   );

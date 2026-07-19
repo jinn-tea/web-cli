@@ -74,6 +74,15 @@ cd acme
 npm run dev
 ```
 
+**No roles?** Plenty of apps have one audience. Pass `--no-roles` and features
+live flat under `src/features/<domain>/` with no `Role` type, no guards and no
+role segment anywhere:
+
+```bash
+jinn-web create blog --no-roles
+jinn-web domain posts            # no --role needed
+```
+
 Anything you don't pass as a flag is prompted for; in CI or a non-interactive
 shell every prompt takes its default instead of hanging.
 
@@ -147,6 +156,7 @@ jinn-web create [name] [options]
 | `-d, --description <text>` | package.json description | `A new Next.js app` |
 | `--output <dir>` | Parent directory | `.` |
 | `--roles <list>` | Comma-separated roles | `admin, member` |
+| `--no-roles` | Single-audience app: flat `features/`, no role machinery | |
 | `--locales <list>` | Comma-separated; first is the source | `en` |
 | `--brand <hex>` | Brand colour | `#2563EB` |
 | `--api-url <url>` | Backend base URL | `http://localhost:4000/api` |

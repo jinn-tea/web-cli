@@ -35,6 +35,12 @@ const SCENARIOS = [
     args: ["--roles", "user", "--locales", "en"],
   },
   {
+    // A roleless project takes a genuinely different template shape: no Role
+    // type, no guards, flat features/. It has to compile on its own terms.
+    name: "roleless",
+    args: ["--no-roles", "--locales", "en"],
+  },
+  {
     name: "multi-role",
     args: [
       "--roles",

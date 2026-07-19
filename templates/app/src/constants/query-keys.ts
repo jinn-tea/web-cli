@@ -1,4 +1,6 @@
+// jinn-web:role-only:start
 import type { RoleGroup } from "./roles";
+// jinn-web:role-only:end
 
 /**
  * Centralized React Query cache keys.
@@ -47,9 +49,15 @@ export function resourceKeys<const T extends string>(resource: T) {
   const all = [resource] as const;
   return {
     all,
+    // jinn-web:role-only:start
     list: (group: RoleGroup, params?: ListParams) =>
       [...all, group, "list", params ?? {}] as const,
     detail: (group: RoleGroup, id: string) =>
       [...all, group, "detail", id] as const,
+    // jinn-web:role-only:end
+    // jinn-web:roleless:start
+    // list: (params?: ListParams) => [...all, "list", params ?? {}] as const,
+    // detail: (id: string) => [...all, "detail", id] as const,
+    // jinn-web:roleless:end
   };
 }

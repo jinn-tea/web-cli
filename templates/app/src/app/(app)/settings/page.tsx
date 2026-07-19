@@ -11,7 +11,10 @@ import {
 } from "@/components/ui/card";
 import { LanguageSwitcher } from "@/components/shared/language-switcher";
 import { PageHeader } from "@/components/shared/page-header";
-import { DEFAULT_GUEST_ROUTE, ROLE_LABEL_KEYS } from "@/constants";
+import { DEFAULT_GUEST_ROUTE } from "@/constants";
+// jinn-web:role-only:start
+import { ROLE_LABEL_KEYS } from "@/constants";
+// jinn-web:role-only:end
 import { useTranslations } from "@/i18n";
 import { logout, useCurrentUser } from "@/lib/auth";
 
@@ -51,12 +54,14 @@ export default function SettingsPage() {
               </dt>
               <dd className="text-body min-w-0 truncate">{user?.email}</dd>
 
+              {/* jinn-web:role-only:start */}
               <dt className="text-label text-muted-foreground">
                 {t("nav.account")}
               </dt>
               <dd className="text-body">
                 {user ? t(ROLE_LABEL_KEYS[user.role]) : null}
               </dd>
+              {/* jinn-web:role-only:end */}
             </dl>
           </CardContent>
         </Card>

@@ -22,7 +22,7 @@ interface CreateFlags {
   appName?: string;
   description?: string;
   output?: string;
-  roles?: string;
+  roles?: string | false;
   locales?: string;
   brand?: string;
   apiUrl?: string;
@@ -43,6 +43,7 @@ export function registerCreate(program: Command): void {
     .option("-d, --description <text>", "project description")
     .option("--output <dir>", "parent directory", ".")
     .option("--roles <list>", "comma-separated roles, e.g. admin,member")
+    .option("--no-roles", "a single-audience app: features live flat, no roles")
     .option("--locales <list>", "comma-separated locales, first is the source")
     .option("--brand <hex>", "brand color, e.g. #2563EB")
     .option("--api-url <url>", "backend base URL")
@@ -83,16 +84,19 @@ async function runCreate(
     defaultValue: toTitle(projectName),
   });
 
-  const rolesInput = await ui.askText(flags.roles, {
-    message: "Which roles does this app have? (comma-separated)",
-    placeholder: "admin, member",
-    defaultValue: "admin, member",
-  });
+  // `--no-roles` is a real mode, not "one role": the generated app has no Role
+  // type, no guards, and no role segment in its folders. Many apps genuinely
+  // have one audience, and making them carry role machinery is pure ceremony.
+  const rolesInput =
+    flags.roles === false
+      ? ""
+      : await ui.askText(typeof flags.roles === "string" ? flags.roles : undefined, {
+          message: "Which roles does this app have? (blank for none)",
+          placeholder: "admin, member",
+          defaultValue: "admin, member",
+        });
 
   const roles = parseList(rolesInput);
-  if (roles.length === 0) {
-    ui.fail("At least one role is required (a single-role app is fine).");
-  }
   for (const role of roles) {
     const result = validateRole(role);
     if (!result.ok) ui.fail(result.message ?? `Invalid role "${role}".`);
@@ -143,7 +147,7 @@ async function runCreate(
         `${pc.bold("Project")}   ${projectName}`,
         `${pc.bold("App name")}  ${appName}`,
         `${pc.bold("Location")}  ${targetDir}`,
-        `${pc.bold("Roles")}     ${roles.join(", ")} ${pc.dim("(+ common)")}`,
+        `${pc.bold("Roles")}     ${roles.length ? `${roles.join(", ")} ${pc.dim("(+ common)")}` : pc.dim("none — flat features/")}`,
         `${pc.bold("Locales")}   ${locales[0]} ${pc.dim("(source)")}${
           locales.length > 1 ? `, ${locales.slice(1).join(", ")}` : ""
         }`,
@@ -221,7 +225,7 @@ async function runCreate(
   ui.note(
     [
       `${pc.bold("Location")}  ${displayPath}`,
-      `${pc.bold("Roles")}     ${roles.join(", ")} ${pc.dim("(+ common)")}`,
+      `${pc.bold("Roles")}     ${roles.length ? `${roles.join(", ")} ${pc.dim("(+ common)")}` : pc.dim("none — flat features/")}`,
       `${pc.bold("Locales")}   ${locales.join(", ")}`,
       `${pc.bold("Brand")}     ${normalizeHex(brandInput)}`,
     ].join("\n"),
@@ -234,7 +238,7 @@ async function runCreate(
       `  cd ${displayPath}`,
       `  ${packageManager} run dev`,
       "",
-      `  ${pc.dim("Add a domain:")}  jinn-web domain <name> --role ${roles[0]}`,
+      `  ${pc.dim("Add a domain:")}  jinn-web domain <name>${roles.length ? ` --role ${roles[0]}` : ""}`,
       `  ${pc.dim("Add a role:")}    jinn-web role <name>`,
       `  ${pc.dim("Check wiring:")}  jinn-web doctor`,
     ].join("\n"),

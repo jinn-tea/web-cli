@@ -13,7 +13,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { APP_ROUTES, DEFAULT_GUEST_ROUTE, ROLE_LABEL_KEYS } from "@/constants";
+import { APP_ROUTES, DEFAULT_GUEST_ROUTE } from "@/constants";
+// jinn-web:role-only:start
+import { ROLE_LABEL_KEYS } from "@/constants";
+// jinn-web:role-only:end
 import { useTranslations } from "@/i18n";
 import { logout, useCurrentUser } from "@/lib/auth";
 import { initials } from "@/lib/format";
@@ -58,9 +61,11 @@ export function UserMenu() {
             <span className="text-caption text-muted-foreground truncate">
               {user.email}
             </span>
+            {/* jinn-web:role-only:start */}
             <span className="text-caption text-muted-foreground mt-1">
               {t(ROLE_LABEL_KEYS[user.role])}
             </span>
+            {/* jinn-web:role-only:end */}
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />

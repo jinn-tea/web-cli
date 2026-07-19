@@ -10,15 +10,15 @@ import { PageHeader } from "@/components/shared/page-header";
 import { SearchInput } from "@/components/shared/search-input";
 import { useTableParams } from "@/hooks/use-table-params";
 import { useTranslations } from "@/i18n";
-import { useRoleGroup } from "@/lib/auth";
-import { <%= it.constantName %>_PAGE_SIZE } from "@/features/<%= it.role %>/<%= it.name %>/constants";
-import { build<%= it.Name %>Columns } from "@/features/<%= it.role %>/<%= it.name %>/components/<%= it.name %>-columns";
-import { <%= it.Entity %>FormDialog } from "@/features/<%= it.role %>/<%= it.name %>/components/<%= it.name %>-form-dialog";
+<% if (it.hasRoles) { %>import { useRoleGroup } from "@/lib/auth";
+<% } %>import { <%= it.constantName %>_PAGE_SIZE } from "@/<%= it.featurePath %>/constants";
+import { build<%= it.Name %>Columns } from "@/<%= it.featurePath %>/components/<%= it.name %>-columns";
+import { <%= it.Entity %>FormDialog } from "@/<%= it.featurePath %>/components/<%= it.name %>-form-dialog";
 import {
   useDelete<%= it.Entity %>,
   use<%= it.Name %>,
-} from "@/features/<%= it.role %>/<%= it.name %>/services/use-<%= it.name %>";
-import type { <%= it.Entity %> } from "@/features/<%= it.role %>/<%= it.name %>/types";
+} from "@/<%= it.featurePath %>/services/use-<%= it.name %>";
+import type { <%= it.Entity %> } from "@/<%= it.featurePath %>/types";
 
 /**
  * The list screen.
@@ -31,15 +31,15 @@ import type { <%= it.Entity %> } from "@/features/<%= it.role %>/<%= it.name %>/
  */
 export function <%= it.Name %>Screen() {
   const t = useTranslations();
-  const group = useRoleGroup();
-  const { params, queryParams, setPage, setQuery, setSort } = useTableParams();
+<% if (it.hasRoles) { %>  const group = useRoleGroup();
+<% } %>  const { params, queryParams, setPage, setQuery, setSort } = useTableParams();
 
   const [editing, setEditing] = useState<<%= it.Entity %> | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [deleting, setDeleting] = useState<<%= it.Entity %> | null>(null);
 
-  const listQuery = use<%= it.Name %>(group, queryParams);
-  const deleteMutation = useDelete<%= it.Entity %>(group);
+  const listQuery = use<%= it.Name %>(<% if (it.hasRoles) { %>group, <% } %>queryParams);
+  const deleteMutation = useDelete<%= it.Entity %>(<% if (it.hasRoles) { %>group<% } %>);
 
   const columns = useMemo(
     () =>

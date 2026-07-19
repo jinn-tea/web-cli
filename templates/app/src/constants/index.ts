@@ -1,4 +1,6 @@
+// jinn-web:role-only:start
 export * from "./roles";
+// jinn-web:role-only:end
 export * from "./routes";
 export * from "./query-keys";
 

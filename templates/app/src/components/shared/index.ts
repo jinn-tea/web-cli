@@ -18,7 +18,9 @@ export { PageHeader, type PageHeaderProps } from "./page-header";
 export { SectionHeader, type SectionHeaderProps } from "./section-header";
 export { SearchInput, type SearchInputProps } from "./search-input";
 export { RowActions, type RowAction } from "./row-actions";
+// jinn-web:role-only:start
 export { RoleScreens, type RoleScreensProps } from "./role-screens";
+// jinn-web:role-only:end
 export { FullPageLoader } from "./full-page-loader";
 export { LanguageSwitcher } from "./language-switcher";
 export { UserAvatar, type UserAvatarProps } from "./user-avatar";

@@ -98,7 +98,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        scenario: [minimal, multi-role]
+        scenario: [minimal, roleless, multi-role]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

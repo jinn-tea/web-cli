@@ -1,6 +1,17 @@
 "use client";
 
-<% if (it.roles.length > 1) { %>import { RoleScreens } from "@/components/shared/role-screens";
+<% if (it.roles.length === 0) { %>import { DashboardScreen } from "@/features/dashboard/components/dashboard-screen";
+
+/**
+ * This app has no roles, so the page renders its one surface directly.
+ *
+ * If roles arrive later, `jinn-web role <name>` migrates the project and
+ * rewrites this into a `<RoleScreens>` dispatch.
+ */
+export default function DashboardPage() {
+  return <DashboardScreen />;
+}
+<% } else if (it.roles.length > 1) { %>import { RoleScreens } from "@/components/shared/role-screens";
 <% it.roles.forEach((role) => { %>import { <%= it.pascal(role) %>Dashboard } from "@/features/<%= role %>/dashboard/components/<%= role %>-dashboard";
 <% }) %>
 /**

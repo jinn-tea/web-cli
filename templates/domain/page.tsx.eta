@@ -1,6 +1,6 @@
 "use client";
 
-<% if (it.isCommon) { %>import { <%= it.Name %>Screen } from "@/features/common/<%= it.name %>/components/<%= it.name %>-screen";
+<% if (it.isCommon || !it.hasRoles) { %>import { <%= it.Name %>Screen } from "@/<%= it.featurePath %>/components/<%= it.name %>-screen";
 
 /**
  * Shared by every role, so the page renders one surface.
@@ -12,7 +12,7 @@
 export default function <%= it.Name %>Page() {
   return <<%= it.Name %>Screen />;
 }
-<% } else { %>import { <%= it.Name %>Screen } from "@/features/<%= it.role %>/<%= it.name %>/components/<%= it.name %>-screen";
+<% } else { %>import { <%= it.Name %>Screen } from "@/<%= it.featurePath %>/components/<%= it.name %>-screen";
 import { ROLES } from "@/constants";
 import { RequireRole } from "@/lib/auth";
 

@@ -1,19 +1,19 @@
-import type { RoleGroup } from "@/constants";
-import {
+<% if (it.hasRoles) { %>import type { RoleGroup } from "@/constants";
+<% } %>import {
   backendClient,
   normalizePagination,
   type Paginated,
   type RawPagination,
   type RequestOptions,
 } from "@/lib/http";
-import { <%= it.camelName %>Endpoints } from "@/features/<%= it.role %>/<%= it.name %>/constants";
+import { <%= it.camelName %>Endpoints } from "@/<%= it.featurePath %>/constants";
 import {
   create<%= it.Entity %>Schema,
   update<%= it.Entity %>Schema,
   type Create<%= it.Entity %>Input,
   type Update<%= it.Entity %>Input,
-} from "@/features/<%= it.role %>/<%= it.name %>/validations/<%= it.name %>.schema";
-import type { <%= it.Entity %> } from "@/features/<%= it.role %>/<%= it.name %>/types";
+} from "@/<%= it.featurePath %>/validations/<%= it.name %>.schema";
+import type { <%= it.Entity %> } from "@/<%= it.featurePath %>/types";
 
 /**
  * The repository — this domain's boundary with the backend.
@@ -50,12 +50,12 @@ function buildQuery(params: ListParams): string {
 
 export const <%= it.camelName %>Repository = {
   async list(
-    group: RoleGroup,
-    params: ListParams = {},
+    <% if (it.hasRoles) { %>group: RoleGroup,
+    <% } %>params: ListParams = {},
     opts?: RequestOptions,
   ): Promise<Paginated<<%= it.Entity %>>> {
     const raw = await backendClient.get<Raw<%= it.Name %>List>(
-      `${<%= it.camelName %>Endpoints(group).list}${buildQuery(params)}`,
+      `${<%= it.camelName %>Endpoints<% if (it.hasRoles) { %>(group)<% } %>.list}${buildQuery(params)}`,
       opts,
     );
     // snake_case → camelCase happens HERE, at the edge, so no component ever
@@ -67,48 +67,48 @@ export const <%= it.camelName %>Repository = {
   },
 
   detail(
-    group: RoleGroup,
-    id: string,
+    <% if (it.hasRoles) { %>group: RoleGroup,
+    <% } %>id: string,
     opts?: RequestOptions,
   ): Promise<<%= it.Entity %>> {
     return backendClient.get<<%= it.Entity %>>(
-      <%= it.camelName %>Endpoints(group).detail(id),
+      <%= it.camelName %>Endpoints<% if (it.hasRoles) { %>(group)<% } %>.detail(id),
       opts,
     );
   },
 
   create(
-    group: RoleGroup,
-    input: Create<%= it.Entity %>Input,
+    <% if (it.hasRoles) { %>group: RoleGroup,
+    <% } %>input: Create<%= it.Entity %>Input,
     opts?: RequestOptions,
   ): Promise<<%= it.Entity %>> {
     // Parse before sending: the form validated already, but a repository that
     // trusts its caller is one refactor away from posting garbage.
     const body = create<%= it.Entity %>Schema.parse(input);
     return backendClient.post<<%= it.Entity %>>(
-      <%= it.camelName %>Endpoints(group).create,
+      <%= it.camelName %>Endpoints<% if (it.hasRoles) { %>(group)<% } %>.create,
       body,
       opts,
     );
   },
 
   update(
-    group: RoleGroup,
-    id: string,
+    <% if (it.hasRoles) { %>group: RoleGroup,
+    <% } %>id: string,
     input: Update<%= it.Entity %>Input,
     opts?: RequestOptions,
   ): Promise<<%= it.Entity %>> {
     const body = update<%= it.Entity %>Schema.parse(input);
     return backendClient.patch<<%= it.Entity %>>(
-      <%= it.camelName %>Endpoints(group).update(id),
+      <%= it.camelName %>Endpoints<% if (it.hasRoles) { %>(group)<% } %>.update(id),
       body,
       opts,
     );
   },
 
-  remove(group: RoleGroup, id: string, opts?: RequestOptions): Promise<void> {
+  remove(<% if (it.hasRoles) { %>group: RoleGroup, <% } %>id: string, opts?: RequestOptions): Promise<void> {
     return backendClient.delete<void>(
-      <%= it.camelName %>Endpoints(group).remove(id),
+      <%= it.camelName %>Endpoints<% if (it.hasRoles) { %>(group)<% } %>.remove(id),
       opts,
     );
   },

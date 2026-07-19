@@ -1,4 +1,5 @@
-import type { RoleGroup } from "@/constants";
+<% if (it.hasRoles) { %>import type { RoleGroup } from "@/constants";
+<% } %>
 
 /**
  * Every endpoint this domain touches — written down exactly once.
@@ -8,13 +9,19 @@ import type { RoleGroup } from "@/constants";
  * serves both. Forking a repository per role is how a codebase ends up with
  * four copies of the same CRUD drifting apart.
  */
-export const <%= it.camelName %>Endpoints = (group: RoleGroup) => ({
+<% if (it.hasRoles) { %>export const <%= it.camelName %>Endpoints = (group: RoleGroup) => ({
   list: `/${group}/<%= it.name %>`,
   detail: (id: string) => `/${group}/<%= it.name %>/${id}`,
   create: `/${group}/<%= it.name %>`,
   update: (id: string) => `/${group}/<%= it.name %>/${id}`,
   remove: (id: string) => `/${group}/<%= it.name %>/${id}`,
-});
+});<% } else { %>export const <%= it.camelName %>Endpoints = {
+  list: "/<%= it.name %>",
+  detail: (id: string) => `/<%= it.name %>/${id}`,
+  create: "/<%= it.name %>",
+  update: (id: string) => `/<%= it.name %>/${id}`,
+  remove: (id: string) => `/<%= it.name %>/${id}`,
+};<% } %>
 
 /** Rows per page for this domain's list. */
 export const <%= it.constantName %>_PAGE_SIZE = 20;

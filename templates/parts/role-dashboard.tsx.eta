@@ -6,14 +6,20 @@ import { PageHeader } from "@/components/shared/page-header";
 import { useTranslations } from "@/i18n";
 import { useCurrentUser } from "@/lib/auth";
 
-/**
+<% if (it.RoleName) { %>/**
  * The <%= it.role %> surface of `/dashboard`.
  *
  * Role-specific screens live in their own role folder — a domain moves to
  * `features/common/` only once a SECOND role genuinely shares it. Add more with
  * `jinn-web domain <name> --role <%= it.role %>`.
  */
-export function <%= it.RoleName %>Dashboard() {
+export function <%= it.RoleName %>Dashboard() {<% } else { %>/**
+ * The dashboard.
+ *
+ * This app has no roles, so features live flat under `features/`. Add more with
+ * `jinn-web domain <name>`.
+ */
+export function DashboardScreen() {<% } %>
   const t = useTranslations();
   const user = useCurrentUser();
 

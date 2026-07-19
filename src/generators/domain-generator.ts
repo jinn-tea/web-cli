@@ -62,7 +62,9 @@ export function deriveNames(input: string, role: string): DomainNames {
 
 /** Where each rendered template lands, relative to the project root. */
 export function domainFilePaths(names: DomainNames) {
-  const dir = `src/features/${names.role}/${names.name}`;
+  const dir = names.role
+    ? `src/features/${names.role}/${names.name}`
+    : `src/features/${names.name}`;
   return {
     dir,
     constants: `${dir}/constants.ts`,
@@ -120,13 +122,17 @@ function catalogNamespace(names: DomainNames, marker = ""): string {
   }`;
 }
 
-function navItemText(names: DomainNames): string {
-  const roles = names.isCommon ? `"all"` : `["${names.role}"]`;
+function navItemText(names: DomainNames, hasRoles: boolean): string {
+  // A roleless project's NavItem has no `roles` field at all — emitting one
+  // would be a type error, not just noise.
+  const roles = !hasRoles
+    ? ""
+    : `\n    roles: ${names.isCommon ? `"all"` : `["${names.role}"]`},`;
+
   return `{
     href: APP_ROUTES.${names.camelName},
     labelKey: "${names.camelName}.title",
-    icon: Package,
-    roles: ${roles},
+    icon: Package,${roles}
   }`;
 }
 
@@ -149,6 +155,11 @@ export async function generateDomain(
 
   const vars = {
     ...names,
+    hasRoles: config.roles.length > 0,
+    // `features/admin/orders` with roles, `features/orders` without.
+    featurePath: names.role
+      ? `features/${names.role}/${names.name}`
+      : `features/${names.name}`,
     // The query-key factory needs a concrete fallback group for the disabled
     // case; the project's first role is as good a default as any.
     firstRoleGroup: config.roles[0] ?? "admin",
@@ -202,10 +213,10 @@ export async function generateDomain(
   );
   addNamedImport(nav, "lucide-react", "Package");
   note(
-    addArrayElement(nav, "NAV_ITEMS", navItemText(names), (text) =>
+    addArrayElement(nav, "NAV_ITEMS", navItemText(names, config.roles.length > 0), (text) =>
       text.includes(`APP_ROUTES.${names.camelName}`),
     ),
-    `nav item (${names.isCommon ? "all roles" : names.role})`,
+    `nav item${names.role ? ` (${names.isCommon ? "all roles" : names.role})` : ""}`,
   );
 
   const apiIndex = openFile(tsProject, path.join(root, "src/api.ts"));

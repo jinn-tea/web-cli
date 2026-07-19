@@ -10,9 +10,16 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+// jinn-web:role-only:start
 import { navItemsForRole } from "@/components/layout/nav-config";
+// jinn-web:role-only:end
+// jinn-web:roleless:start
+// import { navItems } from "@/components/layout/nav-config";
+// jinn-web:roleless:end
 import { useTranslations } from "@/i18n";
+// jinn-web:role-only:start
 import { useCurrentRole } from "@/lib/auth";
+// jinn-web:role-only:end
 
 /**
  * ⌘K palette over the navigation table.
@@ -25,7 +32,9 @@ import { useCurrentRole } from "@/lib/auth";
 export function CommandMenu() {
   const t = useTranslations();
   const router = useRouter();
+  // jinn-web:role-only:start
   const role = useCurrentRole();
+  // jinn-web:role-only:end
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -39,7 +48,12 @@ export function CommandMenu() {
     return () => document.removeEventListener("keydown", onKeyDown);
   }, []);
 
+  // jinn-web:role-only:start
   const items = navItemsForRole(role);
+  // jinn-web:role-only:end
+  // jinn-web:roleless:start
+  // const items = navItems();
+  // jinn-web:roleless:end
 
   return (
     <CommandDialog

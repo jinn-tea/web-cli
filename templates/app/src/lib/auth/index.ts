@@ -8,15 +8,12 @@
  * login/register SCREENS.
  */
 export { useSessionStore, getCurrentUser } from "./session-store";
-export {
-  useCurrentUser,
-  useCurrentRole,
-  useRoleGroup,
-  useSessionStatus,
-  useIsAuthenticated,
-  useHasRole,
-} from "./hooks";
-export { RequireAuth, RequireGuest, RequireRole } from "./guards";
+export { useCurrentUser, useSessionStatus, useIsAuthenticated } from "./hooks";
+// jinn-web:role-only:start
+export { useCurrentRole, useRoleGroup, useHasRole } from "./hooks";
+export { RequireRole } from "./guards";
+// jinn-web:role-only:end
+export { RequireAuth, RequireGuest } from "./guards";
 export {
   login,
   logout,

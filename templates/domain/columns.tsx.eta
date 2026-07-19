@@ -9,7 +9,7 @@ import { TruncatedText } from "@/components/shared/truncated-text";
 import type { TranslateFn } from "@/i18n";
 import { GENERIC_STATUS_TONE } from "@/lib/badges";
 import { formatDate } from "@/lib/datetime";
-import type { <%= it.Entity %> } from "@/features/<%= it.role %>/<%= it.name %>/types";
+import type { <%= it.Entity %> } from "@/<%= it.featurePath %>/types";
 
 /**
  * Column definitions, built by a factory rather than declared inline in the

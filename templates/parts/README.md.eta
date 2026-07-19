@@ -32,13 +32,18 @@ jinn-web add-locale <code>              # add a language
 jinn-web doctor                         # check the wiring stayed intact
 ```
 
-## Roles
+<% if (it.roles.length) { %>## Roles
 
 <% it.roles.forEach((role) => { %>- `<%= role %>` — `src/features/<%= role %>/`
 <% }) %>- `common` — domains two or more roles genuinely share
 
 A domain's default home is its own role's folder. It moves to `common/` only when a second role
-needs it — not preemptively.
+needs it — not preemptively.<% } else { %>## Features
+
+This app has no roles, so features live flat under `src/features/<domain>/`.
+
+If you add one later, `jinn-web role <name>` migrates the project: it moves existing features to
+`features/common/`, rewrites their imports, and adds the role plumbing.<% } %>
 
 ## Locales
 

@@ -8,18 +8,18 @@ import { FormDialog } from "@/components/form/form-dialog";
 import { SelectField } from "@/components/form/select-field";
 import { TextField } from "@/components/form/text-field";
 import { useTranslations } from "@/i18n";
-import { useRoleGroup } from "@/lib/auth";
-import { GENERIC_STATUSES } from "@/lib/badges";
+<% if (it.hasRoles) { %>import { useRoleGroup } from "@/lib/auth";
+<% } %>import { GENERIC_STATUSES } from "@/lib/badges";
 import {
   create<%= it.Entity %>Schema,
   type Create<%= it.Entity %>FormValues,
   type Create<%= it.Entity %>Input,
-} from "@/features/<%= it.role %>/<%= it.name %>/validations/<%= it.name %>.schema";
+} from "@/<%= it.featurePath %>/validations/<%= it.name %>.schema";
 import {
   useCreate<%= it.Entity %>,
   useUpdate<%= it.Entity %>,
-} from "@/features/<%= it.role %>/<%= it.name %>/services/use-<%= it.name %>";
-import type { <%= it.Entity %> } from "@/features/<%= it.role %>/<%= it.name %>/types";
+} from "@/<%= it.featurePath %>/services/use-<%= it.name %>";
+import type { <%= it.Entity %> } from "@/<%= it.featurePath %>/types";
 
 /**
  * Create/edit dialog. One component serves both modes — an "edit" dialog is the
@@ -37,9 +37,9 @@ export function <%= it.Entity %>FormDialog({
   item?: <%= it.Entity %> | null;
 }) {
   const t = useTranslations();
-  const group = useRoleGroup();
-  const createMutation = useCreate<%= it.Entity %>(group);
-  const updateMutation = useUpdate<%= it.Entity %>(group);
+<% if (it.hasRoles) { %>  const group = useRoleGroup();
+<% } %>  const createMutation = useCreate<%= it.Entity %>(<% if (it.hasRoles) { %>group<% } %>);
+  const updateMutation = useUpdate<%= it.Entity %>(<% if (it.hasRoles) { %>group<% } %>);
 
   const isEdit = Boolean(item);
   const isPending = createMutation.isPending || updateMutation.isPending;

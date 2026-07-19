@@ -3,9 +3,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "@/i18n";
+// jinn-web:role-only:start
 import { useCurrentRole } from "@/lib/auth";
+// jinn-web:role-only:end
 import { cn } from "@/lib/utils";
+// jinn-web:role-only:start
 import { navItemsForRole } from "./nav-config";
+// jinn-web:role-only:end
+// jinn-web:roleless:start
+// import { navItems } from "./nav-config";
+// jinn-web:roleless:end
 
 /**
  * Primary navigation, filtered to what this role can actually reach.
@@ -16,8 +23,13 @@ import { navItemsForRole } from "./nav-config";
 export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
   const t = useTranslations();
   const pathname = usePathname();
+  // jinn-web:role-only:start
   const role = useCurrentRole();
   const items = navItemsForRole(role);
+  // jinn-web:role-only:end
+  // jinn-web:roleless:start
+  // const items = navItems();
+  // jinn-web:roleless:end
 
   return (
     <nav aria-label={t("nav.openMenu")} className="flex flex-col gap-0.5 p-2">

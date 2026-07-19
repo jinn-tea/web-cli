@@ -1,7 +1,9 @@
 "use client";
 
+// jinn-web:role-only:start
 import type { Role, RoleGroup } from "@/constants";
 import { roleGroupFor } from "@/constants";
+// jinn-web:role-only:end
 import { useSessionStore } from "./session-store";
 import type { AuthUser, SessionStatus } from "./types";
 
@@ -24,6 +26,7 @@ export function useIsAuthenticated(): boolean {
   return useSessionStore((state) => state.status === "authenticated");
 }
 
+// jinn-web:role-only:start
 /** The signed-in user's role, or null while the session resolves. */
 export function useCurrentRole(): Role | null {
   return useSessionStore((state) => state.user?.role ?? null);
@@ -40,3 +43,4 @@ export function useHasRole(roles: readonly Role[]): boolean {
   const role = useCurrentRole();
   return role !== null && roles.includes(role);
 }
+// jinn-web:role-only:end

@@ -3,12 +3,12 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { FullPageLoader } from "@/components/shared/full-page-loader";
-import {
-  DEFAULT_AUTHED_ROUTE,
-  DEFAULT_GUEST_ROUTE,
-  type Role,
-} from "@/constants";
-import { useCurrentRole, useSessionStatus } from "./hooks";
+import { DEFAULT_AUTHED_ROUTE, DEFAULT_GUEST_ROUTE } from "@/constants";
+// jinn-web:role-only:start
+import type { Role } from "@/constants";
+import { useCurrentRole } from "./hooks";
+// jinn-web:role-only:end
+import { useSessionStatus } from "./hooks";
 
 /**
  * Route guards.
@@ -54,6 +54,7 @@ export function RequireGuest({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+// jinn-web:role-only:start
 /** Restrict a screen to specific roles, redirecting anyone else. */
 export function RequireRole({
   roles,
@@ -79,3 +80,4 @@ export function RequireRole({
   if (!allowed) return <>{fallback ?? <FullPageLoader />}</>;
   return <>{children}</>;
 }
+// jinn-web:role-only:end

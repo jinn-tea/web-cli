@@ -1,11 +1,15 @@
+// jinn-web:role-only:start
 import type { Role } from "@/constants";
+// jinn-web:role-only:end
 
 /** The signed-in user, as the app needs them. */
 export interface AuthUser {
   id: string;
   name: string;
   email: string;
+  // jinn-web:role-only:start
   role: Role;
+  // jinn-web:role-only:end
   avatarUrl?: string | null;
   /** Preferred language, synced with the locale store on sign-in. */
   language?: string | null;

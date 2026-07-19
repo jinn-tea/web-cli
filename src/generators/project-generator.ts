@@ -3,6 +3,7 @@ import path from "node:path";
 import { buildBrandRamp } from "../engine/brand.js";
 import { commitFresh } from "../engine/fs-plan.js";
 import { formatSource } from "../engine/format.js";
+import { applyRoleFirst, applyRoleless, hasRoleBlocks } from "../engine/role-blocks.js";
 import { toKebab, toPascal, toTitle } from "../engine/naming.js";
 import { CONFIG_FILE, type ProjectConfig } from "../engine/project.js";
 import {
@@ -53,8 +54,18 @@ export interface CreateOptions {
 }
 
 /** Template paths excluded from generated projects. */
-function isExcluded(relativePath: string): boolean {
+function isExcluded(relativePath: string, hasRoles: boolean): boolean {
   const normalized = relativePath.split(path.sep).join("/");
+
+  // A roleless project has no Role type, so none of this can exist.
+  if (
+    !hasRoles &&
+    (normalized === "src/constants/roles.ts" ||
+      normalized === "src/constants/roles.test.ts" ||
+      normalized === "src/components/shared/role-screens.tsx")
+  ) {
+    return true;
+  }
 
   return (
     // The reference domain is a development fixture for the template repo, not
@@ -97,6 +108,7 @@ export async function generateProject(options: CreateOptions): Promise<void> {
   const partsDir = path.join(templatesRoot(), "parts");
   const ramp = buildBrandRamp(brandHex);
   const sourceLocale = locales[0]!;
+  const hasRoles = roles.length > 0;
 
   const partVars = {
     projectName,
@@ -104,6 +116,7 @@ export async function generateProject(options: CreateOptions): Promise<void> {
     description,
     roles,
     locales,
+    hasRoles,
     localeNames: Object.fromEntries(
       locales.map((locale) => [
         locale,
@@ -134,15 +147,36 @@ export async function generateProject(options: CreateOptions): Promise<void> {
   await commitFresh(targetDir, async (staging) => {
     // 1. Copy the template, minus the excluded paths.
     const files: RenderedFile[] = await renderTree(appTemplate, partVars, {
-      exclude: isExcluded,
+      exclude: (relative) => isExcluded(relative, hasRoles),
     });
 
     for (const file of files) {
       const destination = path.join(staging, file.relativePath);
-      if (file.content === null) {
-        await fs.copy(file.sourcePath, destination);
-      } else {
+
+      if (file.content !== null) {
         await fs.outputFile(destination, file.content, "utf8");
+        continue;
+      }
+
+      // Files carrying `jinn-web:role-only` / `jinn-web:roleless` regions are
+      // resolved to one shape or the other. Everything else copies untouched
+      // (including binaries, which must never be read as text).
+      const isText = /\.(ts|tsx|css|md|json|mjs)$/.test(file.relativePath);
+      const source = isText
+        ? await fs.readFile(file.sourcePath, "utf8")
+        : null;
+
+      if (source !== null && hasRoleBlocks(source)) {
+        const resolved = hasRoles
+          ? applyRoleFirst(source)
+          : applyRoleless(source);
+        await fs.outputFile(
+          destination,
+          await formatSource(resolved, destination),
+          "utf8",
+        );
+      } else {
+        await fs.copy(file.sourcePath, destination);
       }
     }
 
@@ -152,7 +186,7 @@ export async function generateProject(options: CreateOptions): Promise<void> {
       await fs.outputFile(target, await renderPart(template, target, vars));
     };
 
-    await write("src/constants/roles.ts", "roles.ts.eta");
+    if (hasRoles) await write("src/constants/roles.ts", "roles.ts.eta");
     await write("src/i18n/locales.ts", "locales.ts.eta");
     await write("src/i18n/index.ts", "i18n-index.ts.eta");
     await write("src/app/(app)/dashboard/page.tsx", "dashboard-page.tsx.eta");
@@ -162,19 +196,58 @@ export async function generateProject(options: CreateOptions): Promise<void> {
     // Local env so `dev` works immediately after scaffolding.
     await write(".env.local", "env.example.eta");
 
-    // 3. A dashboard surface per role.
-    for (const role of roles) {
+    // 3. A dashboard surface — one per role, or a single flat one.
+    if (hasRoles) {
+      for (const role of roles) {
+        await write(
+          `src/features/${role}/dashboard/components/${toKebab(role)}-dashboard.tsx`,
+          "role-dashboard.tsx.eta",
+          { ...partVars, role, RoleName: toPascal(role) },
+        );
+        // The role-scoped shared tier exists from day one so the three-tier
+        // placement rule has somewhere obvious to go.
+        await fs.outputFile(
+          path.join(staging, `src/features/${role}/_shared/.gitkeep`),
+          "",
+        );
+      }
+    } else {
+      // Flat: features live directly under features/, with no role segment.
       await write(
-        `src/features/${role}/dashboard/components/${toKebab(role)}-dashboard.tsx`,
+        "src/features/dashboard/components/dashboard-screen.tsx",
         "role-dashboard.tsx.eta",
-        { ...partVars, role, RoleName: toPascal(role) },
+        { ...partVars, role: "", RoleName: "" },
       );
-      // The role-scoped shared tier exists from day one so the three-tier
-      // placement rule has somewhere obvious to go.
-      await fs.outputFile(
-        path.join(staging, `src/features/${role}/_shared/.gitkeep`),
-        "",
+    }
+
+    // The auth SCREENS live under `common/` only when there are roles to be
+    // common to; otherwise they sit flat like any other feature.
+    if (!hasRoles) {
+      await fs.move(
+        path.join(staging, "src/features/common/auth"),
+        path.join(staging, "src/features/auth"),
       );
+      await fs.remove(path.join(staging, "src/features/common"));
+
+      // Moving the folder is half the job — every import still points at the
+      // old path, and a scaffold that doesn't resolve its own imports is worse
+      // than one that never moved them.
+      const rewriteImports = async (dir: string): Promise<void> => {
+        for (const entry of await fs.readdir(dir, { withFileTypes: true })) {
+          const target = path.join(dir, entry.name);
+          if (entry.isDirectory()) {
+            await rewriteImports(target);
+          } else if (/\.(ts|tsx)$/.test(entry.name)) {
+            const source = await fs.readFile(target, "utf8");
+            const updated = source.replaceAll(
+              "@/features/common/auth",
+              "@/features/auth",
+            );
+            if (updated !== source) await fs.writeFile(target, updated, "utf8");
+          }
+        }
+      };
+      await rewriteImports(path.join(staging, "src"));
     }
 
     // 4. Surgical edits to copied files.
@@ -229,7 +302,9 @@ export async function generateProject(options: CreateOptions): Promise<void> {
     }
     await editFile(catalogPath, (source) => {
       let next = removeNamespace(source, "orders");
-      next = rewriteRolesNamespace(next, roles, toTitle);
+      next = hasRoles
+        ? rewriteRolesNamespace(next, roles, toTitle)
+        : removeNamespace(next, "roles");
       next = normalizeDashboardKeys(next);
       return next;
     });
