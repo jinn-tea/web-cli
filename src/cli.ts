@@ -3,6 +3,8 @@ import pc from "picocolors";
 import { registerCreate } from "./commands/create.js";
 import { registerDoctor } from "./commands/doctor.js";
 import { registerDomain } from "./commands/domain.js";
+import { registerMisc } from "./commands/misc.js";
+import { registerRole } from "./commands/role.js";
 import { version } from "./version.js";
 
 /**
@@ -21,6 +23,8 @@ const program = new Command("codeable-web")
 
 registerCreate(program);
 registerDomain(program);
+registerRole(program);
+registerMisc(program);
 registerDoctor(program);
 
 program.parseAsync(process.argv).catch((error: unknown) => {

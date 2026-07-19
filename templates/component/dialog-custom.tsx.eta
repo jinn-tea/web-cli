@@ -1,0 +1,39 @@
+"use client";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useTranslations } from "@/i18n";
+
+/**
+ * <%= it.titleName %>.
+ *
+ * Note `[&>*]:min-w-0` on the content: a dialog's width is fixed by design, so
+ * its children must be free to shrink. Without it one long unbroken string
+ * sizes the flex/grid track past the dialog and the layout shears.
+ */
+export function <%= it.Name %>Dialog({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const t = useTranslations();
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-lg [&>*]:min-w-0">
+        <DialogHeader>
+          <DialogTitle>{t("common.actions.confirm")}</DialogTitle>
+          {/* Radix warns when a dialog has no description — keep it explicit. */}
+          <DialogDescription>{t("common.states.loading")}</DialogDescription>
+        </DialogHeader>
+      </DialogContent>
+    </Dialog>
+  );
+}

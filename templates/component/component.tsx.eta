@@ -1,0 +1,20 @@
+<% if (it.isClient) { %>"use client";
+
+<% } %>import { cn } from "@/lib/utils";
+
+/**
+ * <%= it.titleName %>.
+ *
+ * <% if (it.tier === "shared") { %>Lives in `components/shared/` because it's domain-free and parameterized —
+ * judge placement by the component's API, not by how many features use it today.<% } else if (it.tier === "role") { %>Shared by two or more domains within the "<%= it.role %>" role. It moves up to
+ * `components/shared/` only if a second ROLE needs it — promote one tier at a time.<% } else { %>Local to the <%= it.domain %> domain. If a second domain needs it, move it up to
+ * `features/<%= it.role %>/_shared/components/` rather than importing across domains.<% } %>
+ */
+export interface <%= it.Name %>Props {
+  className?: string;
+  children?: React.ReactNode;
+}
+
+export function <%= it.Name %>({ className, children }: <%= it.Name %>Props) {
+  return <div className={cn(className)}>{children}</div>;
+}

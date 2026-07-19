@@ -315,6 +315,10 @@ export async function removeDomain(
     if (remaining.length === 0) await fs.remove(pageDir);
   }
 
+  // Next caches generated route types that still import the deleted page, so
+  // the next typecheck would otherwise fail pointing at a build artifact.
+  await fs.remove(path.join(root, ".next", "types"));
+
   return { deleted, unwired };
 }
 

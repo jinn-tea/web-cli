@@ -1,0 +1,37 @@
+"use client";
+
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { useTranslations } from "@/i18n";
+
+/**
+ * <%= it.titleName %> — a confirmation.
+ *
+ * Wraps the shared `ConfirmDialog` rather than building an AlertDialog by hand,
+ * so every destructive action in the app looks and behaves identically.
+ */
+export function <%= it.Name %>Dialog({
+  open,
+  onOpenChange,
+  onConfirm,
+  isPending = false,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onConfirm: () => void;
+  isPending?: boolean;
+}) {
+  const t = useTranslations();
+
+  return (
+    <ConfirmDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={t("common.confirm.deleteTitle")}
+      description={t("common.confirm.deleteDescription")}
+      confirmLabel={t("common.actions.confirm")}
+      destructive
+      isPending={isPending}
+      onConfirm={onConfirm}
+    />
+  );
+}

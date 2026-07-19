@@ -118,8 +118,18 @@ export async function generateProject(options: CreateOptions): Promise<void> {
     ident: identifierFor,
   };
 
-  const renderPart = async (file: string, vars: object = partVars) =>
-    renderString(await fs.readFile(path.join(partsDir, file), "utf8"), vars);
+  // Rendered parts go through Prettier like everything else. Skipping it leaves
+  // files that are valid but not canonical, so the first codemod to touch one
+  // reformats it and the diff shows changes nobody made.
+  const renderPart = async (
+    file: string,
+    target: string,
+    vars: object = partVars,
+  ) =>
+    formatSource(
+      renderString(await fs.readFile(path.join(partsDir, file), "utf8"), vars),
+      target,
+    );
 
   await commitFresh(targetDir, async (staging) => {
     // 1. Copy the template, minus the excluded paths.
@@ -137,49 +147,27 @@ export async function generateProject(options: CreateOptions): Promise<void> {
     }
 
     // 2. Files that are fully generated.
-    await fs.outputFile(
-      path.join(staging, "src/constants/roles.ts"),
-      await renderPart("roles.ts.eta"),
-    );
-    await fs.outputFile(
-      path.join(staging, "src/i18n/locales.ts"),
-      await renderPart("locales.ts.eta"),
-    );
-    await fs.outputFile(
-      path.join(staging, "src/i18n/index.ts"),
-      await renderPart("i18n-index.ts.eta"),
-    );
-    await fs.outputFile(
-      path.join(staging, "src/app/(app)/dashboard/page.tsx"),
-      await renderPart("dashboard-page.tsx.eta"),
-    );
-    await fs.outputFile(
-      path.join(staging, ".env.example"),
-      await renderPart("env.example.eta"),
-    );
-    await fs.outputFile(
-      path.join(staging, "README.md"),
-      await renderPart("README.md.eta"),
-    );
+    const write = async (relative: string, template: string, vars?: object) => {
+      const target = path.join(staging, relative);
+      await fs.outputFile(target, await renderPart(template, target, vars));
+    };
+
+    await write("src/constants/roles.ts", "roles.ts.eta");
+    await write("src/i18n/locales.ts", "locales.ts.eta");
+    await write("src/i18n/index.ts", "i18n-index.ts.eta");
+    await write("src/app/(app)/dashboard/page.tsx", "dashboard-page.tsx.eta");
+    await write(".env.example", "env.example.eta");
+    await write("README.md", "README.md.eta");
 
     // Local env so `dev` works immediately after scaffolding.
-    await fs.outputFile(
-      path.join(staging, ".env.local"),
-      await renderPart("env.example.eta"),
-    );
+    await write(".env.local", "env.example.eta");
 
     // 3. A dashboard surface per role.
     for (const role of roles) {
-      await fs.outputFile(
-        path.join(
-          staging,
-          `src/features/${role}/dashboard/components/${toKebab(role)}-dashboard.tsx`,
-        ),
-        await renderPart("role-dashboard.tsx.eta", {
-          ...partVars,
-          role,
-          RoleName: toPascal(role),
-        }),
+      await write(
+        `src/features/${role}/dashboard/components/${toKebab(role)}-dashboard.tsx`,
+        "role-dashboard.tsx.eta",
+        { ...partVars, role, RoleName: toPascal(role) },
       );
       // The role-scoped shared tier exists from day one so the three-tier
       // placement rule has somewhere obvious to go.

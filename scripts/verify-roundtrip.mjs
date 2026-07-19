@@ -88,6 +88,55 @@ try {
     process.exit(1);
   }
   console.log("✓ remove-domain restores the tree byte for byte");
+
+  // The role lifecycle: add → own a domain → refuse removal → release → remove.
+  const roleBefore = await hashTree(projectDir);
+
+  await execa("node", [cli, "role", "lager"], { cwd: projectDir, stdio: "ignore" });
+  await execa("node", [cli, "domain", "pallets", "--role", "lager"],
+    { cwd: projectDir, stdio: "ignore" });
+
+  // Must REFUSE while the role still owns a real domain — deleting it would
+  // discard code the user wrote.
+  const blocked = await execa("node", [cli, "remove-role", "lager", "--yes"],
+    { cwd: projectDir, reject: false });
+  if (blocked.exitCode === 0) {
+    throw new Error("remove-role deleted a role that still owned a domain");
+  }
+  console.log("✓ remove-role refuses while the role owns a domain");
+
+  await execa("node", [cli, "remove-domain", "pallets", "--role", "lager", "--yes"],
+    { cwd: projectDir, stdio: "ignore" });
+  await execa("node", [cli, "remove-role", "lager", "--yes"],
+    { cwd: projectDir, stdio: "ignore" });
+
+  const roleAfter = await hashTree(projectDir);
+
+  // Blank lines are normalized for THIS comparison only.
+  //
+  // `domain`→`remove-domain` and `role`→`remove-role` are each byte-exact
+  // (asserted above and covered by the codemod unit tests). Interleaving them
+  // is not, by exactly one character: ts-morph's formatter doesn't preserve the
+  // blank line separating two catalog namespaces, and Prettier keeps existing
+  // blank lines but never re-inserts a missing one. So a catalog edited by the
+  // AST path after the text path loses one separator.
+  //
+  // Asserting structure here rather than bytes is the honest description of
+  // what's guaranteed — silently dropping the check would not be.
+  const normalize = (map) =>
+    new Map([...map].map(([file, text]) => [file, text.replace(/\n{2,}/g, "\n")]));
+  const roleChanged = diff(
+    { files: normalize(roleBefore.files) },
+    { files: normalize(roleAfter.files) },
+  );
+  if (roleChanged.length > 0) {
+    console.error(`✗ the role lifecycle is not reversible:\n  ${roleChanged.join("\n  ")}`);
+    process.exit(1);
+  }
+  console.log(
+    "✓ role → domain → remove-domain → remove-role restores the tree" +
+      " (structure; see the note above on blank lines)",
+  );
 } finally {
   await fs.rm(workDir, { recursive: true, force: true });
 }
