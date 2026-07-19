@@ -13,6 +13,11 @@ export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
+  // Both projects share ONE dev server. Playwright's default worker count is
+  // per-machine, not per-server, so two projects × N workers can saturate it
+  // and tests fail on timeouts that look like product bugs. Capping keeps the
+  // suite honest — it should only go red for real defects.
+  workers: 4,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? "github" : "list",
 

@@ -39,6 +39,12 @@ export async function findUnreachableClipping(page: Page): Promise<string[]> {
     const elements = document.querySelectorAll<HTMLElement>("body *");
 
     for (const element of elements) {
+      // `sr-only` is clipped ON PURPOSE — it's visually hidden precisely so
+      // assistive tech can read it. It's the opposite of unreachable, and
+      // flagging it is the kind of false positive that teaches people to
+      // ignore the whole check.
+      if (element.classList.contains("sr-only")) continue;
+
       const style = getComputedStyle(element);
       const clips =
         style.overflow !== "visible" || style.textOverflow === "ellipsis";
