@@ -1,0 +1,47 @@
+# <%= it.appName %>
+
+<%= it.description %>
+
+Scaffolded with [codeable-web-cli](https://github.com/jinn-tea/web-cli) — Next.js 16 App Router,
+role-first features, BFF cookie auth, React Query, Zod, Tailwind v4 tokens, shadcn/ui, typed i18n.
+
+Read **[CLAUDE.md](./CLAUDE.md)** before adding code — it's the architecture contract.
+
+## Getting started
+
+```bash
+cp .env.example .env.local     # point NEXT_PUBLIC_API_URL at your backend
+<%= it.packageManager %> run dev
+```
+
+## Commands
+
+```bash
+<%= it.packageManager %> run dev         # dev server
+<%= it.packageManager %> run build       # production build + full typecheck
+<%= it.packageManager %> run verify      # typecheck + lint + unit tests
+<%= it.packageManager %> run sweep       # Playwright sweep (layout, a11y, auth, forms)
+```
+
+## Generating code
+
+```bash
+codeable-web domain <name> --role <%= it.roles[0] %>   # a full CRUD domain, wired end to end
+codeable-web role <name>                    # add a role; the compiler lists what to update
+codeable-web add-locale <code>              # add a language
+codeable-web doctor                         # check the wiring stayed intact
+```
+
+## Roles
+
+<% it.roles.forEach((role) => { %>- `<%= role %>` — `src/features/<%= role %>/`
+<% }) %>- `common` — domains two or more roles genuinely share
+
+A domain's default home is its own role's folder. It moves to `common/` only when a second role
+needs it — not preemptively.
+
+## Locales
+
+<% it.locales.forEach((locale, i) => { %>- `<%= locale %>`<% if (i === 0) { %> (source — add new keys here first)<% } %>
+<% }) %>
+Every user-facing string goes through `t("...")`. There are no hardcoded display strings.

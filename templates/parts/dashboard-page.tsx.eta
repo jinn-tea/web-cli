@@ -1,0 +1,35 @@
+"use client";
+
+<% if (it.roles.length > 1) { %>import { RoleScreens } from "@/components/shared/role-screens";
+<% it.roles.forEach((role) => { %>import { <%= it.pascal(role) %>Dashboard } from "@/features/<%= role %>/dashboard/components/<%= role %>-dashboard";
+<% }) %>
+/**
+ * One URL, one surface per role.
+ *
+ * The page stays THIS thin — it dispatches and nothing else. Because `screens`
+ * is a `Record<Role, ReactNode>`, adding a role to `ROLES` breaks this file at
+ * compile time until the new surface is decided, which is exactly the reminder
+ * you want.
+ */
+export default function DashboardPage() {
+  return (
+    <RoleScreens
+      screens={{
+<% it.roles.forEach((role) => { %>        <%= role %>: <<%= it.pascal(role) %>Dashboard />,
+<% }) %>      }}
+    />
+  );
+}
+<% } else { %>import { <%= it.pascal(it.roles[0]) %>Dashboard } from "@/features/<%= it.roles[0] %>/dashboard/components/<%= it.roles[0] %>-dashboard";
+
+/**
+ * Single-role app, so the page renders its one surface directly.
+ *
+ * When a second role arrives (`codeable-web role <name>`), this becomes
+ * `<RoleScreens screens={{ … }} />` — a `Record<Role, ReactNode>` that the
+ * compiler forces you to complete.
+ */
+export default function DashboardPage() {
+  return <<%= it.pascal(it.roles[0]) %>Dashboard />;
+}
+<% } %>

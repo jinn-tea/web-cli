@@ -6,6 +6,11 @@
  * never silently go missing.
  *
  * Interpolate with `{name}` placeholders: `t("dashboard.welcome", { name })`.
+ *
+ * ⚠️ Deliberately NOT `as const`. The key PATHS are what `MessageKey` is built
+ * from, and those stay literal either way — but `as const` would also make each
+ * VALUE a literal type (`"Save"` rather than `string`), and then no translation
+ * could ever satisfy `Messages`: German "Speichern" isn't assignable to `"Save"`.
  */
 const en = {
   common: {
@@ -180,6 +185,6 @@ const en = {
     },
   },
   // codeable-web:i18n — the `domain` generator appends new namespaces here.
-} as const;
+};
 
 export default en;

@@ -1,0 +1,63 @@
+{
+  "name": "codeable-web-cli",
+  "version": "0.1.0",
+  "description": "Scaffold and grow production-ready Next.js apps with the Codeable web architecture.",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "verify": "npm run typecheck && npm run test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jinn-tea/web-cli.git"
+  },
+  "keywords": [
+    "nextjs",
+    "cli",
+    "scaffold",
+    "codeable",
+    "template"
+  ],
+  "author": "",
+  "license": "MIT",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/jinn-tea/web-cli/issues"
+  },
+  "homepage": "https://github.com/jinn-tea/web-cli#readme",
+  "dependencies": {
+    "@clack/prompts": "^1.7.0",
+    "commander": "^15.0.0",
+    "culori": "^4.0.2",
+    "eta": "^4.6.0",
+    "execa": "^10.0.0",
+    "fs-extra": "^11.3.6",
+    "picocolors": "^1.1.1",
+    "ts-morph": "^28.0.0"
+  },
+  "devDependencies": {
+    "@types/culori": "^4.0.1",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^26.1.1",
+    "tsup": "^8.5.1",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
+  },
+  "bin": {
+    "codeable-web": "./bin/codeable-web.js"
+  },
+  "files": [
+    "bin",
+    "dist",
+    "templates",
+    "schema"
+  ],
+  "engines": {
+    "node": ">=20"
+  }
+}

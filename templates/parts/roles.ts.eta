@@ -1,0 +1,59 @@
+import type { MessageKey } from "@/i18n/types";
+
+/**
+ * ─────────────────────────────────────────────────────────────────────────
+ * THE SINGLE SOURCE OF TRUTH FOR ROLES.
+ *
+ * Never hardcode a role string anywhere else — import from here.
+ *
+ * Every map below is a `Record<Role, …>`, which makes them **exhaustive by the
+ * type system**: adding a role to `ROLES` turns every incomplete map into a
+ * compile error, so `tsc` hands you the list of decisions to make instead of
+ * letting a role silently fall through a `switch`. That is exactly what
+ * `codeable-web role <name>` relies on.
+ * ─────────────────────────────────────────────────────────────────────────
+ */
+export const ROLES = [<%= it.roles.map((r) => `"${r}"`).join(", ") %>] as const;
+
+export type Role = (typeof ROLES)[number];
+
+export function isRole(value: string): value is Role {
+  return (ROLES as readonly string[]).includes(value);
+}
+
+/**
+ * Backend URL groups. Many backends scope endpoints by a coarser grouping than
+ * the role itself (`/admin/*`, `/member/*`), and several roles can share one
+ * group — that mapping lives here, and repositories take a `RoleGroup` so one
+ * parameterized repository serves every role instead of N copy-pasted forks.
+ *
+ * Starts as an identity map; collapse roles onto a shared group when your
+ * backend groups them.
+ */
+export const ROLE_GROUPS = [<%= it.roles.map((r) => `"${r}"`).join(", ") %>] as const;
+
+export type RoleGroup = (typeof ROLE_GROUPS)[number];
+
+export const ROLE_TO_GROUP: Record<Role, RoleGroup> = {
+<% it.roles.forEach((role) => { %>  <%= role %>: "<%= role %>",
+<% }) %>};
+
+export function roleGroupFor(role: Role): RoleGroup {
+  return ROLE_TO_GROUP[role];
+}
+
+/** i18n keys for role display names — never render a raw role string. */
+export const ROLE_LABEL_KEYS: Record<Role, MessageKey> = {
+<% it.roles.forEach((role) => { %>  <%= role %>: "roles.<%= role %>",
+<% }) %>};
+
+/**
+ * Capability sets. Add one per capability rather than testing role strings at
+ * the call site — `satisfies readonly Role[]` keeps them honest, and a new role
+ * makes you decide explicitly whether it belongs.
+ */
+export const INVITE_CAPABLE_ROLES = ["<%= it.roles[0] %>"] as const satisfies readonly Role[];
+
+export function canInvite(role: Role): boolean {
+  return (INVITE_CAPABLE_ROLES as readonly Role[]).includes(role);
+}
