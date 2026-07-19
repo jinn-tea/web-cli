@@ -25,7 +25,7 @@ export default function DashboardPage() {
 /**
  * Single-role app, so the page renders its one surface directly.
  *
- * When a second role arrives (`codeable-web role <name>`), this becomes
+ * When a second role arrives (`jinn-web role <name>`), this becomes
  * `<RoleScreens screens={{ … }} />` — a `Record<Role, ReactNode>` that the
  * compiler forces you to complete.
  */

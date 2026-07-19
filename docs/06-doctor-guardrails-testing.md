@@ -23,7 +23,7 @@ interface DoctorCheck {
 interface Issue { file: string; line?: number; message: string; fixable: boolean }
 ```
 
-`codeable-web doctor` prints grouped ✓/✗ per check (exit 2 if any issue);
+`jinn-web doctor` prints grouped ✓/✗ per check (exit 2 if any issue);
 `doctor --fix` applies every `fixable` issue through the plan engine and re-runs.
 
 ## 2. The 9 checks (exact semantics)
@@ -36,9 +36,9 @@ interface Issue { file: string; line?: number; message: string; fixable: boolean
 | 4 | `api-index` | Every `features/*/*/constants.ts` exporting endpoints is re-exported from `src/api.ts` ("an index that's only mostly complete stops being trusted"). | add missing export ✓ |
 | 5 | `i18n` | Key-set parity source vs other catalogs (belt to TS's braces); orphaned keys (defined, never referenced via `t("…")` incl. dynamic-prefix allowlist); leftover `TODO(<loc>):` values (warning, not error). | remove orphans ✓ (with confirm) |
 | 6 | `boundaries` | Import-graph scan: role→role imports, sibling-domain imports, shared-layer→features imports (AR-002/003 — belt to the ESLint zones, catches files the linter hasn't seen). | ✗ |
-| 7 | `roles` | `codeable.config.json` roles ⊆ `src/features/*` dirs and vice versa; every role present in `ROLE_LABEL_KEYS` and the i18n `roles.*` namespace. | sync config ✓ |
+| 7 | `roles` | `jinn-web.config.json` roles ⊆ `src/features/*` dirs and vice versa; every role present in `ROLE_LABEL_KEYS` and the i18n `roles.*` namespace. | sync config ✓ |
 | 8 | `naming` | Every domain follows AR-008 (`use-<domain>.ts`, `<domain>.repository.ts`, `<domain>.schema.ts` present under standard subfolders); flags drift. | ✗ |
-| 9 | `deps` | `codeable.config.json.cliVersion` vs installed CLI (nag if template conventions moved); duplicate-purpose packages (two toast libs, two date libs) from a small denylist. | ✗ |
+| 9 | `deps` | `jinn-web.config.json.cliVersion` vs installed CLI (nag if template conventions moved); duplicate-purpose packages (two toast libs, two date libs) from a small denylist. | ✗ |
 
 Output style (Flutter parity):
 
@@ -48,19 +48,19 @@ Running doctor checks for my-app…
 Routes            ✓ 12 pages ↔ 12 constants
 Query keys        ✗ 1 inline queryKey — src/features/admin/orders/services/use-orders.ts:31
 …
-8 checks passed, 1 issue found (1 fixable → run codeable-web doctor --fix)
+8 checks passed, 1 issue found (1 fixable → run jinn-web doctor --fix)
 ```
 
 ## 3. The ESLint guardrail pack — `@codeable/eslint-config-web`
 
 A **separate npm package** in the same monorepo (or repo sibling), consumed by the template and
-adoptable by existing repos via `codeable-web guardrails`. Flat-config ESM export:
+adoptable by existing repos via `jinn-web guardrails`. Flat-config ESM export:
 
 ```js
 export default function codeableWeb({ roles = [] } = {}) { return [ /* config objects */ ] }
 ```
 
-Layers (each maps to `codeable-web-quality` rule ids):
+Layers (each maps to `jinn-web-quality` rule ids):
 
 1. **Import boundaries (AR-002/003)** — `no-restricted-imports` zones *generated from `roles`*:
    role↛role, `features/common`↛`features/<role>`, `lib|components|types|constants|hooks`↛
@@ -74,7 +74,7 @@ Layers (each maps to `codeable-web-quality` rule ids):
 6. **Query (DS-004/005)** — `@tanstack/eslint-plugin-query` recommended.
 7. **a11y** — `eslint-plugin-jsx-a11y` recommended.
 
-`codeable-web guardrails` (for existing repos like lucas_web): detect roles (ask if
+`jinn-web guardrails` (for existing repos like lucas_web): detect roles (ask if
 undetectable), install the package, write/merge `eslint.config.mjs`, run `eslint --format
 summary` and report the violation count *without failing* — adoption is a ratchet: `--level
 error|warn` chooses severity so a legacy repo can start at `warn`.

@@ -11,10 +11,10 @@ import tanstackQuery from "@tanstack/eslint-plugin-query";
  * the linter enforces survives; one that lives only in a doc lasts until the
  * first deadline.
  *
- * Each block below maps to a rule in the `codeable-web-quality` skill. The
+ * Each block below maps to a rule in the `jinn-web-quality` skill. The
  * judgment-based rules it can't express (is this domain in the right role
  * folder? is this component doing business logic?) are what `/web-audit` and
- * `codeable-web doctor` are for.
+ * `jinn-web doctor` are for.
  * ─────────────────────────────────────────────────────────────────────────
  */
 const eslintConfig = defineConfig([
@@ -28,7 +28,7 @@ const eslintConfig = defineConfig([
   globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts"]),
 
   {
-    name: "codeable/architecture",
+    name: "jinn-web/architecture",
     rules: {
       // ── AR-002/003 · Layering ──────────────────────────────────────────
       // Dependencies point inward. Shared layers never import features, and
@@ -87,7 +87,7 @@ const eslintConfig = defineConfig([
   {
     // Infrastructure defines the primitives the rules above point at, so it is
     // exempt from them — narrowly, by path.
-    name: "codeable/infrastructure-exemptions",
+    name: "jinn-web/infrastructure-exemptions",
     files: [
       "src/lib/http/**",
       "src/lib/auth/session.ts",
@@ -106,7 +106,7 @@ const eslintConfig = defineConfig([
     // Tooling configs and the e2e sweep run in Node, outside the app's runtime,
     // and legitimately read raw env (CI flags, base URLs). They are not part of
     // the shipped bundle, so `config/env.ts` doesn't apply to them.
-    name: "codeable/tooling",
+    name: "jinn-web/tooling",
     files: [
       "*.config.{ts,mjs,js}",
       "e2e/**",
@@ -121,7 +121,7 @@ const eslintConfig = defineConfig([
   {
     // shadcn primitives are generated — recolor via tokens in globals.css,
     // don't fight their conventions here.
-    name: "codeable/generated-ui",
+    name: "jinn-web/generated-ui",
     files: ["src/components/ui/**"],
     rules: {
       "@typescript-eslint/no-explicit-any": "off",

@@ -2,8 +2,8 @@
 
 The template is 70% of the CLI's value. It is the web equivalent of the Flutter CLI's generated
 app (128 Dart files, `DataState`/`execute()`/`ApiService`/~40 core widgets/l10n/flavors, all
-pre-wired) — and it must hold the same bar: **a fresh `codeable-web create` output passes
-`/web-audit` with zero findings and every `codeable-web-quality` rule.**
+pre-wired) — and it must hold the same bar: **a fresh `jinn-web create` output passes
+`/web-audit` with zero findings and every `jinn-web-quality` rule.**
 
 It lives in the CLI repo at `templates/app/`. Files needing variable substitution carry an
 `.eta` suffix (stripped on render); everything else is copied verbatim. This doc specifies every
@@ -29,7 +29,7 @@ file.
 ├── public/                       #   favicon.ico, icon.svg, apple-icon.png, logo placeholder
 ├── e2e/                          # §10 Playwright sweep harness
 ├── .claude/                      # §9 AI config
-├── codeable.config.json          # CLI state (doc 01 §8)
+├── jinn-web.config.json          # CLI state (doc 01 §8)
 ├── package.json                  # §11 pinned deps, scripts
 ├── tsconfig.json                 # strict: true, @/* → src/*, noUncheckedIndexedAccess
 ├── next.config.ts
@@ -249,7 +249,7 @@ Every generated domain (doc 05) mirrors this file naming exactly (AR-008).
 
 - `constants/roles.ts.eta` renders: `ROLES` as const tuple from the answer, `Role` union,
   `ROLE_LABEL_KEYS: Record<Role, MessageKey>`, `DEFAULT_AUTHED_ROUTE`, and an exhaustiveness
-  guard (`const _check: Record<Role, true> = …` pattern) so `codeable-web role` additions force
+  guard (`const _check: Record<Role, true> = …` pattern) so `jinn-web role` additions force
   compile-time completion everywhere.
 - Per role: `features/<role>/_shared/.gitkeep` + a starter domain (doc 05 generator invoked by
   create, exactly like the Flutter CLI generates `<role>_onboarding` per role).
@@ -293,7 +293,7 @@ template contains **zero** hardcoded display strings.
   carve-up + `_shared/` tier), data-flow chain, "where things go", backend contract, tokens,
   commands. This is the *single most copied file* — treat its prose as product.
 - **`.claude/settings.json`** — sensible permissions for the stack (`npm run *`, `npx tsc`, lint).
-- **README** points to `web-audit` / `codeable-web-quality` skills and the `doctor` command.
+- **README** points to `web-audit` / `jinn-web-quality` skills and the `doctor` command.
 
 ## 10. Verification harness (beyond Flutter parity)
 
@@ -313,7 +313,7 @@ react-hook-form @hookform/resolvers class-variance-authority clsx tailwind-merge
 prettier, vitest, @playwright/test, @testing-library/react`.
 
 Scripts: `dev build start lint typecheck (tsc --noEmit) test sweep (playwright) doctor
-(codeable-web doctor) format`.
+(jinn-web doctor) format`.
 
 ## 12. `eslint.config.mjs`
 

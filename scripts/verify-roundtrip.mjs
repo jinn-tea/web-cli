@@ -15,7 +15,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const cli = path.join(repoRoot, "bin/codeable-web.js");
+const cli = path.join(repoRoot, "bin/jinn-web.js");
 
 /** Hash every source file so any stray character shows up. */
 async function hashTree(dir) {

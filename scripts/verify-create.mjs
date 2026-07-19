@@ -62,7 +62,7 @@ async function run(command, args, cwd) {
 }
 
 async function verifyScenario(scenario) {
-  const workDir = await fs.mkdtemp(path.join(os.tmpdir(), `codeable-web-${scenario.name}-`));
+  const workDir = await fs.mkdtemp(path.join(os.tmpdir(), `jinn-web-${scenario.name}-`));
   const projectName = `verify-${scenario.name}`;
   const projectDir = path.join(workDir, projectName);
 
@@ -73,7 +73,7 @@ async function verifyScenario(scenario) {
     await run(
       "node",
       [
-        path.join(repoRoot, "bin/codeable-web.js"),
+        path.join(repoRoot, "bin/jinn-web.js"),
         "create",
         projectName,
         ...scenario.args,

@@ -16,7 +16,7 @@ import type { RoleGroup } from "./roles";
  *   detail(group, id)→ one entity
  */
 
-/** `codeable-web domain` appends new key factories to this object. */
+/** `jinn-web domain` appends new key factories to this object. */
 export const QUERY_KEYS = {
   session: {
     all: ["session"] as const,

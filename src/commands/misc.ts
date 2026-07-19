@@ -79,7 +79,7 @@ function registerComponent(program: Command): void {
         const project = await requireProject(process.cwd()).catch((error: Error) =>
           ui.fail(error.message),
         );
-        ui.intro(`codeable-web component ${name}`);
+        ui.intro(`jinn-web component ${name}`);
 
         // The three-tier placement rule, made a prompt: promote one tier at a
         // time, and judge by the component's API rather than by today's usage.
@@ -181,7 +181,7 @@ function registerDialog(program: Command): void {
         const project = await requireProject(process.cwd()).catch((error: Error) =>
           ui.fail(error.message),
         );
-        ui.intro(`codeable-web dialog ${name}`);
+        ui.intro(`jinn-web dialog ${name}`);
 
         let role = "";
         let domain = "";
@@ -247,7 +247,7 @@ function registerAddLocale(program: Command): void {
         ui.fail(`"${code}" is already a locale in this project.`);
       }
 
-      ui.intro(`codeable-web add-locale ${code}`);
+      ui.intro(`jinn-web add-locale ${code}`);
 
       const sourceLocale = config.locales[0]!;
       const sourcePath = path.join(root, `src/i18n/messages/${sourceLocale}.ts`);
@@ -314,7 +314,7 @@ function registerAddLocale(program: Command): void {
         [
           `${pc.green("+")} src/i18n/messages/${code}.ts ${pc.dim("(every string marked TODO)")}`,
           "",
-          `  ${pc.dim("Translate, then:")} codeable-web doctor`,
+          `  ${pc.dim("Translate, then:")} jinn-web doctor`,
         ].join("\n"),
       );
     });
@@ -334,7 +334,7 @@ function registerRename(program: Command): void {
       const project = await requireProject(process.cwd()).catch((error: Error) =>
         ui.fail(error.message),
       );
-      ui.intro("codeable-web rename");
+      ui.intro("jinn-web rename");
 
       const changed: string[] = [];
 

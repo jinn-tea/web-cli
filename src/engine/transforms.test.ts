@@ -202,7 +202,7 @@ describe("seedLocaleCatalog", () => {
 describe("rewritePackageJson", () => {
   it("sets the name and keeps dependencies untouched", () => {
     const pkg = JSON.stringify(
-      { name: "codeable-web-template", version: "9.9.9", dependencies: { next: "16" } },
+      { name: "jinn-web-template", version: "9.9.9", dependencies: { next: "16" } },
       null,
       2,
     );

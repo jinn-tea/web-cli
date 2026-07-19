@@ -9,17 +9,17 @@ build-order plan with exit criteria per milestone.
 
 | Concern | Flutter CLI | Web CLI |
 |---|---|---|
-| Registry | pub.dev (`codeable_cli`) | npm (`codeable-web-cli`) |
-| Install | `dart pub global activate codeable_cli` | `npm i -g codeable-web-cli` **or zero-install `npx codeable-web-cli create`** |
-| Binary | `codeable_cli` | `codeable-web` |
-| Self-update | `pub_updater` + post-command nag | `update-notifier` (daily check, post-command one-liner) + `codeable-web update` (prints/executes the right `npm i -g`/`pnpm add -g` line) |
+| Registry | pub.dev (`codeable_cli`) | npm (`jinn-web`) |
+| Install | `dart pub global activate codeable_cli` | `npm i -g jinn-web` **or zero-install `npx jinn-web create`** |
+| Binary | `codeable_cli` | `jinn-web` |
+| Self-update | `pub_updater` + post-command nag | `update-notifier` (daily check, post-command one-liner) + `jinn-web update` (prints/executes the right `npm i -g`/`pnpm add -g` line) |
 | Version stamp | `build_version` → `version.dart` | `tsup` define → `version.ts` |
 
 Publishing rules:
 - `npm publish --provenance --access public` from the CI release job only (never from a laptop);
   trigger = pushed tag `vX.Y.Z`.
 - `files` allowlist keeps the tarball lean but MUST include `templates/`, `assets/`, `schema/`.
-- Post-publish smoke: CI runs `npx codeable-web-cli@latest create -n smoke --no-install --dry-run`
+- Post-publish smoke: CI runs `npx jinn-web@latest create -n smoke --no-install --dry-run`
   in a clean container.
 
 ## 2. Versioning & the template-drift problem
@@ -30,9 +30,9 @@ Semver with a CLI-specific meaning:
 - **major** — a *convention* change (folder shape, wiring-point shape, guardrail rule promoted
   to error) that would make `doctor`/generators disagree with previously-generated apps.
 
-Every generated app records `cliVersion` in `codeable.config.json`. `doctor` check #9 nags on
+Every generated app records `cliVersion` in `jinn-web.config.json`. `doctor` check #9 nags on
 major drift. Maintain `docs/MIGRATIONS.md` in the CLI repo: one section per major, with exact
-manual steps (v2+ may grow `codeable-web migrate`, out of scope for v1).
+manual steps (v2+ may grow `jinn-web migrate`, out of scope for v1).
 
 `CHANGELOG.md` from day one, Flutter-CLI style (its 39KB changelog is part of why it's
 trustworthy). Conventional commits (`feat:`/`fix:`/`chore:`) — release notes generated from them.
@@ -43,13 +43,13 @@ The end state: **scaffold, rules, and audit all describe the same architecture, 
 
 1. **Generated apps ship AI config** (doc 02 §9): rendered CLAUDE.md + `.claude/settings.json`.
 2. **Skills updated once the CLI ships** (one-line edits, do them at v1.0):
-   - `web-audit` workflow step 2: *"If `codeable.config.json` exists, the repo was scaffolded by
-     codeable-web-cli — the standard infra names are guaranteed; run `codeable-web doctor` and
+   - `web-audit` workflow step 2: *"If `jinn-web.config.json` exists, the repo was scaffolded by
+     jinn-web — the standard infra names are guaranteed; run `jinn-web doctor` and
      fold its report into the findings before sweeping."*
-   - `codeable-web-quality` overview: same note; Tooling Enforcement section points at
-     `codeable-web guardrails` as the installer.
+   - `jinn-web-quality` overview: same note; Tooling Enforcement section points at
+     `jinn-web guardrails` as the installer.
 3. **Claude Code plugin (v1.x)** — Flutter CLI parity (it ships a companion plugin): a
-   `codeable-web` plugin exposing `/create-domain`, `/doctor` as slash commands that shell out
+   `jinn-web` plugin exposing `/create-domain`, `/doctor` as slash commands that shell out
    to the CLI, so agents drive generation through the same tested path instead of hand-writing
    boilerplate.
 4. **Agent-friendliness is a feature requirement**, not an afterthought: every command
@@ -70,7 +70,7 @@ The template is a living product with the same review bar as holos:
 ## 5. Build order — milestones with exit criteria
 
 **M0 — Golden template as a repo (1–2 weeks of focused work; 70% of total value)**
-Build `templates/app/` as a plain runnable Next.js repo first (name it `codeable-web-template`).
+Build `templates/app/` as a plain runnable Next.js repo first (name it `jinn-web-template`).
 lucas_web is the **donor, not the blueprint** (doc 02 preamble): extract its proven transport /
 i18n / roles / tokens, but build the redesigned parts fresh — BFF-lite auth, `lib/auth`,
 nuqs URL state, the DataTable system, `RoleScreens`, dark-ready tokens, mutation helpers,
@@ -80,7 +80,7 @@ reporting seam, and the full §4 component/helper catalog. No CLI yet.
 **M1 — Engine + `create` (the npx moment)**
 Doc 03 engine, then doc 04 `create` (template moves into the CLI repo, tokenized `.eta` files
 carved out). Publish `0.x` to npm.
-*Exit:* `npx codeable-web-cli create` on a clean machine → app passes the full verify suite;
+*Exit:* `npx jinn-web create` on a clean machine → app passes the full verify suite;
 golden matrix + rollback tests green.
 
 **M2 — `domain` + `remove-domain` + `doctor` (daily-driver value)**
@@ -99,7 +99,7 @@ level as the real-world pilot; skills cross-references updated; docs/README poli
 
 **v1.x roadmap (post-1.0, in rough priority):** `doctor --json` · Claude Code plugin ·
 `migrate` command · optional topology-B (internal route handlers) template variant · dark-mode
-token variant · `codeable-web upgrade-deps` (template-verified dependency bumps) · telemetry-free
+token variant · `jinn-web upgrade-deps` (template-verified dependency bumps) · telemetry-free
 usage docs site.
 
 ## 6. Risks & mitigations

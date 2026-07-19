@@ -27,7 +27,7 @@ Multi-word input `vehicle-types` → `VehicleTypes` / `useVehicleTypes` / `vehic
 ## 2. `domain <name>` — the `feature` equivalent
 
 ```
-codeable-web domain <name> [-r --role <role> | -R --pick-role] [--no-page] [--starter] [--dry-run]
+jinn-web domain <name> [-r --role <role> | -R --pick-role] [--no-page] [--starter] [--dry-run]
 ```
 
 - No `--role` and project has roles → `--pick-role` behavior via `askSelect` over
@@ -99,7 +99,7 @@ changed/skipped), delete the domain dir and the `(app)` page, remove seeded i18n
    remaining decision site.
 2. `ROLE_LABEL_KEYS` entry + i18n `roles.<name>` key in all catalogs.
 3. `features/<name>/_shared/.gitkeep`.
-4. Update `codeable.config.json`.
+4. Update `jinn-web.config.json`.
 5. Run `tsc --noEmit`, **parse the errors, and print them as a checklist**:
 
 ```
@@ -107,7 +107,7 @@ Role "lager" added. The compiler found 3 places that need a decision:
   ☐ src/constants/roles.ts:41   ROLE_TO_GROUP missing "lager"
   ☐ src/app/(app)/dashboard/page.tsx:12  role dispatch missing case
   ☐ src/lib/permissions.ts:8    action table missing "lager"
-Generate its first domain:  codeable-web domain <name> --role lager
+Generate its first domain:  jinn-web domain <name> --role lager
 ```
 
 That reframing — *compiler errors as the todo list* — is the entire point of the tuple+guard

@@ -36,7 +36,7 @@ async function runAddRole(name: string): Promise<void> {
     ui.fail(`"${name}" is already a role in this project.`);
   }
 
-  ui.intro(`codeable-web role ${name}`);
+  ui.intro(`jinn-web role ${name}`);
 
   const result = await ui.step(`Adding role "${name}"`, () =>
     addRole(project, name),
@@ -55,7 +55,7 @@ async function runAddRole(name: string): Promise<void> {
       [
         pc.green("The project still compiles — nothing else to decide."),
         "",
-        `  ${pc.dim("Give it a domain:")} codeable-web domain <name> --role ${name}`,
+        `  ${pc.dim("Give it a domain:")} jinn-web domain <name> --role ${name}`,
       ].join("\n"),
     );
     return;
@@ -75,7 +75,7 @@ async function runAddRole(name: string): Promise<void> {
     [
       "The exhaustiveness guards found these — each one is a choice only you can make.",
       "",
-      `  ${pc.dim("Then:")} codeable-web domain <name> --role ${name}`,
+      `  ${pc.dim("Then:")} jinn-web domain <name> --role ${name}`,
     ].join("\n"),
   );
 }
@@ -95,7 +95,7 @@ async function runRemoveRole(
     ui.fail("This is the project's only role — an app needs at least one.");
   }
 
-  ui.intro(`codeable-web remove-role ${name}`);
+  ui.intro(`jinn-web remove-role ${name}`);
 
   if (!flags.yes) {
     const confirmed = await ui.askConfirm(
@@ -113,7 +113,7 @@ async function runRemoveRole(
       `"${name}" still owns ${result.blockedBy.length} domain(s): ${result.blockedBy.join(", ")}.\n` +
         `Remove or migrate them first — deleting them here would discard real code:\n` +
         result.blockedBy
-          .map((domain) => `  codeable-web remove-domain ${domain} --role ${name}`)
+          .map((domain) => `  jinn-web remove-domain ${domain} --role ${name}`)
           .join("\n"),
     );
   }

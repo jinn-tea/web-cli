@@ -2,7 +2,7 @@
 
 <%= it.description %>
 
-Scaffolded with [codeable-web-cli](https://github.com/jinn-tea/web-cli) — Next.js 16 App Router,
+Scaffolded with [jinn-web](https://github.com/jinn-tea/web-cli) — Next.js 16 App Router,
 role-first features, BFF cookie auth, React Query, Zod, Tailwind v4 tokens, shadcn/ui, typed i18n.
 
 Read **[CLAUDE.md](./CLAUDE.md)** before adding code — it's the architecture contract.
@@ -26,10 +26,10 @@ cp .env.example .env.local     # point NEXT_PUBLIC_API_URL at your backend
 ## Generating code
 
 ```bash
-codeable-web domain <name> --role <%= it.roles[0] %>   # a full CRUD domain, wired end to end
-codeable-web role <name>                    # add a role; the compiler lists what to update
-codeable-web add-locale <code>              # add a language
-codeable-web doctor                         # check the wiring stayed intact
+jinn-web domain <name> --role <%= it.roles[0] %>   # a full CRUD domain, wired end to end
+jinn-web role <name>                    # add a role; the compiler lists what to update
+jinn-web add-locale <code>              # add a language
+jinn-web doctor                         # check the wiring stayed intact
 ```
 
 ## Roles

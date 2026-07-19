@@ -2,7 +2,7 @@
  * Barrel for the shared component catalog.
  *
  * Import from `@/components/shared` for cross-cutting pieces. Note a barrel
- * export is NOT a usage — `codeable-web doctor` checks real call sites when it
+ * export is NOT a usage — `jinn-web doctor` checks real call sites when it
  * hunts dead code.
  */
 export {

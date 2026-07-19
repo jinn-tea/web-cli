@@ -1,6 +1,6 @@
 # Codeable Web Template
 
-The golden template `codeable-web create` emits. It is a **real, runnable Next.js 16 app** — build
+The golden template `jinn-web create` emits. It is a **real, runnable Next.js 16 app** — build
 and iterate on it directly (`npm run dev`), and the CLI tokenizes it into `.eta` templates in M1.
 
 ## Quick start

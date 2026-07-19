@@ -11,7 +11,7 @@ import { useCurrentUser } from "@/lib/auth";
  *
  * Role-specific screens live in their role's folder — a domain moves to
  * `features/common/` only once a SECOND role genuinely shares it. Generate more
- * with `codeable-web domain <name> --role admin`.
+ * with `jinn-web domain <name> --role admin`.
  */
 export function AdminDashboard() {
   const t = useTranslations();

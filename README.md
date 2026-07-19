@@ -1,4 +1,4 @@
-# codeable-web-cli
+# jinn-web
 
 A Node/TypeScript CLI that scaffolds and grows production-ready Next.js (App Router) apps with the
 Codeable web architecture — the web counterpart to the Codeable Flutter CLI, matched command-for-
@@ -8,15 +8,15 @@ command and deliberately better where that one is weak.
 > `npm i -g github:jinn-tea/web-cli`
 
 ```bash
-npx codeable-web-cli create my-app --roles admin,member --locales en,de --brand "#2563EB"
+npx jinn-web create my-app --roles admin,member --locales en,de --brand "#2563EB"
 ```
 
 ```bash
-codeable-web domain orders --role admin   # 9 files, 6 registries wired
-codeable-web role lager                   # + the compiler's decision checklist
-codeable-web add-locale de                # catalog seeded, every string marked
-codeable-web doctor --fix                 # verify the wiring is still intact
-codeable-web guardrails --level warn      # install the rules in an existing repo
+jinn-web domain orders --role admin   # 9 files, 6 registries wired
+jinn-web role lager                   # + the compiler's decision checklist
+jinn-web add-locale de                # catalog seeded, every string marked
+jinn-web doctor --fix                 # verify the wiring is still intact
+jinn-web guardrails --level warn      # install the rules in an existing repo
 ```
 
 The generated app passes `typecheck`, `lint`, unit tests, `build` and a Playwright sweep out of the
@@ -46,7 +46,7 @@ See [`templates/app/README.md`](templates/app/README.md) for the full inventory.
 ```bash
 npm run build      # bundle the CLI
 npm run verify     # typecheck + unit tests
-node bin/codeable-web.js create demo --roles a,b --no-install --no-git
+node bin/jinn-web.js create demo --roles a,b --no-install --no-git
 ```
 
 The template is a real app — work on it directly:

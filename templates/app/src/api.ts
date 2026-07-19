@@ -10,7 +10,7 @@
  * because it depends on every feature, which is the one direction the layering
  * rules forbid for anything that IS imported.
  *
- * `codeable-web domain` appends to it automatically, and `codeable-web doctor`
+ * `jinn-web domain` appends to it automatically, and `jinn-web doctor`
  * fails when a feature's endpoints are missing — an index that's only mostly
  * complete stops being trusted.
  */

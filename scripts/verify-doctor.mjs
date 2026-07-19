@@ -13,7 +13,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const cli = path.join(repoRoot, "bin/codeable-web.js");
+const cli = path.join(repoRoot, "bin/jinn-web.js");
 
 /** Run doctor and return its parsed report (exit 2 = issues found). */
 async function doctor(cwd) {

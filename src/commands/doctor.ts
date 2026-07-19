@@ -63,7 +63,7 @@ async function runDoctor(flags: { fix?: boolean; json?: boolean }): Promise<void
   );
   const context = await buildContext(project.root, project);
 
-  if (!flags.json) ui.intro("codeable-web doctor");
+  if (!flags.json) ui.intro("jinn-web doctor");
 
   const results: { id: string; title: string; issues: Issue[] }[] = [];
   for (const check of CHECKS) {
@@ -130,7 +130,7 @@ async function runDoctor(flags: { fix?: boolean; json?: boolean }): Promise<void
   ui.outro(
     errors.length === 0
       ? pc.green(summary)
-      : `${summary}${fixable > 0 && !flags.fix ? pc.dim(`\n  ${fixable} fixable — run \`codeable-web doctor --fix\``) : ""}`,
+      : `${summary}${fixable > 0 && !flags.fix ? pc.dim(`\n  ${fixable} fixable — run \`jinn-web doctor --fix\``) : ""}`,
   );
 
   // Exit 2 signals "issues found" so CI can gate on it without confusing it

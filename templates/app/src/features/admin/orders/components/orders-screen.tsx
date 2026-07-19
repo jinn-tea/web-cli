@@ -21,7 +21,7 @@ import {
 import type { Order } from "@/features/admin/orders/types";
 
 /**
- * The reference list screen — what `codeable-web domain` generates.
+ * The reference list screen — what `jinn-web domain` generates.
  *
  * Note what ISN'T here: no fetch, no loading/error/empty branching, no
  * pagination wiring, no sort state. `DataTable` owns the states, `useTableParams`

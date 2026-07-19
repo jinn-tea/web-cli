@@ -60,15 +60,15 @@ async function runCreate(
   positionalName: string | undefined,
   flags: CreateFlags,
 ): Promise<void> {
-  ui.intro("codeable-web create");
+  ui.intro("jinn-web create");
 
   // Refuse to nest a project inside another — almost always a mistake, and the
   // generators would then resolve the wrong root.
   const enclosing = await findProjectRoot(process.cwd());
   if (enclosing) {
     ui.fail(
-      `You're already inside a codeable-web project (${pc.dim(enclosing)}).\n` +
-        `Run create from outside it, or use \`codeable-web domain\` to add to this one.`,
+      `You're already inside a jinn-web project (${pc.dim(enclosing)}).\n` +
+        `Run create from outside it, or use \`jinn-web domain\` to add to this one.`,
     );
   }
 
@@ -180,7 +180,7 @@ async function runCreate(
         await execa("git", ["add", "-A"], { cwd: targetDir });
         await execa(
           "git",
-          ["commit", "-q", "-m", "chore: scaffold with codeable-web-cli"],
+          ["commit", "-q", "-m", "chore: scaffold with jinn-web"],
           { cwd: targetDir },
         );
       })
@@ -212,9 +212,15 @@ async function runCreate(
       });
   }
 
+  // A relative path is friendlier when the project is under the cwd, and
+  // actively worse when it isn't (`cd ../../../../private/tmp/...`).
+  const relative = path.relative(process.cwd(), targetDir);
+  const displayPath =
+    !relative || relative.startsWith("..") ? targetDir : `./${relative}`;
+
   ui.note(
     [
-      `${pc.bold("Location")}  ./${path.relative(process.cwd(), targetDir) || projectName}`,
+      `${pc.bold("Location")}  ${displayPath}`,
       `${pc.bold("Roles")}     ${roles.join(", ")} ${pc.dim("(+ common)")}`,
       `${pc.bold("Locales")}   ${locales.join(", ")}`,
       `${pc.bold("Brand")}     ${normalizeHex(brandInput)}`,
@@ -225,12 +231,12 @@ async function runCreate(
   ui.outro(
     [
       `${pc.bold("Next steps")}`,
-      `  cd ${path.relative(process.cwd(), targetDir) || projectName}`,
+      `  cd ${displayPath}`,
       `  ${packageManager} run dev`,
       "",
-      `  ${pc.dim("Add a domain:")}  codeable-web domain <name> --role ${roles[0]}`,
-      `  ${pc.dim("Add a role:")}    codeable-web role <name>`,
-      `  ${pc.dim("Check wiring:")}  codeable-web doctor`,
+      `  ${pc.dim("Add a domain:")}  jinn-web domain <name> --role ${roles[0]}`,
+      `  ${pc.dim("Add a role:")}    jinn-web role <name>`,
+      `  ${pc.dim("Check wiring:")}  jinn-web doctor`,
     ].join("\n"),
   );
 }

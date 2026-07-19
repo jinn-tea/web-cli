@@ -1,7 +1,7 @@
 /**
  * Every route string in the app. Never hardcode a path in `<Link href>`,
  * `router.push`, or `redirect()` — import from here so a route rename is one
- * edit and `codeable-web doctor` can verify pages ↔ constants stay in sync.
+ * edit and `jinn-web doctor` can verify pages ↔ constants stay in sync.
  */
 
 export const AUTH_ROUTES = {
@@ -11,7 +11,7 @@ export const AUTH_ROUTES = {
   resetPassword: "/reset-password",
 } as const;
 
-/** `codeable-web domain` appends new routes to this object. */
+/** `jinn-web domain` appends new routes to this object. */
 export const APP_ROUTES = {
   dashboard: "/dashboard",
   orders: "/orders",

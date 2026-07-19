@@ -51,7 +51,7 @@ async function resolveRole(
     if (!roles.includes(flag)) {
       ui.fail(
         `"${flag}" isn't a role in this project. Available: ${roles.join(", ")}.\n` +
-          `Add it with \`codeable-web role ${flag}\`.`,
+          `Add it with \`jinn-web role ${flag}\`.`,
       );
     }
     return flag;
@@ -84,7 +84,7 @@ async function runDomain(
     ui.fail(error.message),
   );
 
-  ui.intro(`codeable-web domain ${input}`);
+  ui.intro(`jinn-web domain ${input}`);
 
   const role = await resolveRole(
     allRoles(project.config),
@@ -123,7 +123,7 @@ async function runDomain(
       `  ${pc.dim("Navigate:")}  <Link href={APP_ROUTES.${names.camelName}}>`,
       `  ${pc.dim("Entity:")}    edit src/features/${role}/${names.name}/types/index.ts`,
       `  ${pc.dim("Endpoints:")} edit src/features/${role}/${names.name}/constants.ts`,
-      `  ${pc.dim("Check:")}     codeable-web doctor`,
+      `  ${pc.dim("Check:")}     jinn-web doctor`,
     ].join("\n"),
   );
 }
@@ -136,7 +136,7 @@ async function runRemoveDomain(
     ui.fail(error.message),
   );
 
-  ui.intro(`codeable-web remove-domain ${input}`);
+  ui.intro(`jinn-web remove-domain ${input}`);
 
   // Find which role owns it rather than making the user remember.
   let role = flags.role;

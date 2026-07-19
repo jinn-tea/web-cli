@@ -10,7 +10,7 @@ import type { MessageKey } from "@/i18n/types";
  * type system**: adding a role to `ROLES` turns every incomplete map into a
  * compile error, so `tsc` hands you the list of decisions to make instead of
  * letting a role silently fall through a `switch`. That is exactly what
- * `codeable-web role <name>` relies on.
+ * `jinn-web role <name>` relies on.
  * ─────────────────────────────────────────────────────────────────────────
  */
 export const ROLES = ["admin", "member"] as const;

@@ -4,13 +4,13 @@ import path from "node:path";
 /**
  * Project detection and the CLI's own state file.
  *
- * `codeable.config.json` is what makes generators deterministic: roles, locales
+ * `jinn-web.config.json` is what makes generators deterministic: roles, locales
  * and the CLI version are recorded rather than re-inferred from the filesystem
  * on every run. (The Flutter CLI has no equivalent and must re-discover state
  * each time, which is where its ambiguity comes from.)
  */
 
-export const CONFIG_FILE = "codeable.config.json";
+export const CONFIG_FILE = "jinn-web.config.json";
 
 export interface ProjectConfig {
   $schema?: string;
@@ -60,8 +60,8 @@ export async function requireProject(cwd: string): Promise<Project> {
   if (!root) {
     throw new Error(
       `No ${CONFIG_FILE} found here or in any parent directory.\n` +
-        `Run this inside a project created by codeable-web, or scaffold one with:\n` +
-        `  codeable-web create <name>`,
+        `Run this inside a project created by jinn-web, or scaffold one with:\n` +
+        `  jinn-web create <name>`,
     );
   }
   return { root, config: await readConfig(root) };

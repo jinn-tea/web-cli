@@ -1,6 +1,6 @@
 # 01 — Vision & Architecture
 
-> **codeable-web-cli** — a Node/TypeScript CLI that scaffolds production-ready Next.js (App Router)
+> **jinn-web** — a Node/TypeScript CLI that scaffolds production-ready Next.js (App Router)
 > apps with the Codeable web architecture: role-first features, external-backend repository
 > pattern, TanStack React Query, Zustand, Zod, Tailwind v4 tokens, shadcn/ui, typed i18n — and
 > then keeps generating and validating code inside them for the project's whole life.
@@ -21,19 +21,19 @@ l10n, flavors — all present before the first feature was written. The audits (
 then only had to keep projects on the rails.
 
 The web side has the rails **documented** (lucas_web's CLAUDE.md, the `web-audit` and
-`codeable-web-quality` skills) but nothing that **lays** them. Every new web project starts from
+`jinn-web-quality` skills) but nothing that **lays** them. Every new web project starts from
 `create-next-app` and gets manually dragged toward the convention. This CLI closes that loop:
 
 ```
-codeable-web create  ──►  a repo that already passes /web-audit with zero findings
-codeable-web domain  ──►  a feature that already follows all 44 codeable-web-quality rules
-codeable-web doctor  ──►  proof it stayed that way
+jinn-web create  ──►  a repo that already passes /web-audit with zero findings
+jinn-web domain  ──►  a feature that already follows all 44 jinn-web-quality rules
+jinn-web doctor  ──►  proof it stayed that way
 ```
 
 ## 2. Product definition
 
-- **Package name (npm):** `codeable-web-cli`
-- **Binary:** `codeable-web` (also runnable as `npx codeable-web-cli <cmd>`)
+- **Package name (npm):** `jinn-web`
+- **Binary:** `jinn-web` (also runnable as `npx jinn-web <cmd>`)
 - **Runtime:** Node ≥ 20, ESM-only, TypeScript compiled with `tsup`
 - **Scaffolds:** Next.js 16 App Router · React 19 · TypeScript strict · Tailwind v4 · shadcn/ui ·
   TanStack Query v5 · Zustand v5 · Zod v4 · typed i18n (no lib, the lucas_web pattern) ·
@@ -49,7 +49,7 @@ codeable-web doctor  ──►  proof it stayed that way
 Every Flutter CLI command mapped to its web equivalent. Names, flags and prompt behavior are
 specified exactly in docs 04–06.
 
-| Flutter CLI (`codeable_cli`)   | Web CLI (`codeable-web`)          | Notes |
+| Flutter CLI (`codeable_cli`)   | Web CLI (`jinn-web`)          | Notes |
 |---|---|---|
 | `create` (`-n -o -a -d --output --roles`) | `create` (`-n -a -d --output --roles --locales --brand --api-url --pm`) | No `--org` (no bundle ids on web); adds locales, brand hex, backend URL, package manager. |
 | `feature <name> --role/--pick-role` | `domain <name> --role/--pick-role` | "Domain" matches web vocabulary (`features/<role>/<domain>`). |
@@ -87,7 +87,7 @@ These were verified in source and live runs — they are contracts, not aspirati
 5. **Ships its own AI config.** The Flutter CLI writes `CLAUDE.md`, `.cursorrules`,
    `.claude/settings.json`, and a bundled audit skill into every generated app. We ship the
    web equivalents: the CLAUDE.md template (doc 02 §9), `.claude/settings.json`, and pointers to
-   `web-audit`/`codeable-web-quality`.
+   `web-audit`/`jinn-web-quality`.
 6. **Role-aware from the scaffold.** `create --roles admin,customer` creates role folders each with
    a fully-wired starter feature. Web `create --roles` does the same (doc 04 §6).
 
@@ -109,9 +109,9 @@ Each of these is a confirmed weakness in the Flutter CLI source, with the web-si
 Mirrors the Flutter CLI's shape (so your muscle memory transfers) with the improvements above:
 
 ```
-codeable-web-cli/
+jinn-web/
 ├── bin/
-│   └── codeable-web.js            # #!/usr/bin/env node → dist/cli.js
+│   └── jinn-web.js            # #!/usr/bin/env node → dist/cli.js
 ├── src/
 │   ├── cli.ts                     # commander program: registers all commands, --version, update nag
 │   ├── commands/                  # one file per command + index.ts barrel
@@ -170,7 +170,7 @@ Nothing else at runtime. `execa` allowed for spawning `npm/pnpm install`, `git i
 
 ```
 parse flags ─► fill gaps with @clack prompts ─► validate (naming.ts)
-  ─► detectProject() guard (generators require a codeable-web project; create requires empty/confirmed dir)
+  ─► detectProject() guard (generators require a jinn-web project; create requires empty/confirmed dir)
   ─► build FileOp[] plan (pure — no disk writes)
   ─► --dry-run? print plan and exit
   ─► execute plan transactionally (spinner per step, mason-logger-style)
@@ -178,11 +178,11 @@ parse flags ─► fill gaps with @clack prompts ─► validate (naming.ts)
   ─► print "next steps" block (exact copy style of the Flutter CLI's summary)
 ```
 
-A generated project is identified by a `codeable.config.json` at its root (written by `create`):
+A generated project is identified by a `jinn-web.config.json` at its root (written by `create`):
 
 ```jsonc
 {
-  "$schema": "https://unpkg.com/codeable-web-cli/schema/codeable.config.schema.json",
+  "$schema": "https://unpkg.com/jinn-web/schema/codeable.config.schema.json",
   "cliVersion": "1.0.0",
   "roles": ["admin", "customer"],        // + "common" implied
   "locales": ["en", "de"],               // first entry = source catalog
@@ -203,7 +203,7 @@ must re-discover state from the filesystem every run; this file removes a whole 
    `doctor`-clean, and each `remove-*` restores the pre-generation state byte-for-byte (verified
    by round-trip tests).
 3. `doctor` catches every seeded breakage in the test fixtures (doc 06 §4.3).
-4. Published to npm; `npx codeable-web-cli create` works on a clean machine with only Node 20.
+4. Published to npm; `npx jinn-web create` works on a clean machine with only Node 20.
 
 ## 10. Reading order
 

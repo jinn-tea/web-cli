@@ -71,7 +71,7 @@ function isExcluded(relativePath: string): boolean {
     normalized === ".env.example" ||
     normalized === "README.md" ||
     // Template-repo bookkeeping.
-    normalized === "codeable.config.json" ||
+    normalized === "jinn-web.config.json" ||
     normalized === ".env.local" ||
     normalized.startsWith("src/constants/roles.test") ||
     normalized === "tsconfig.tsbuildinfo"

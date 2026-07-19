@@ -11,7 +11,7 @@ import { useCurrentUser } from "@/lib/auth";
  *
  * Role-specific screens live in their own role folder — a domain moves to
  * `features/common/` only once a SECOND role genuinely shares it. Add more with
- * `codeable-web domain <name> --role <%= it.role %>`.
+ * `jinn-web domain <name> --role <%= it.role %>`.
  */
 export function <%= it.RoleName %>Dashboard() {
   const t = useTranslations();

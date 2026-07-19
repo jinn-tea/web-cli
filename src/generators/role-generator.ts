@@ -134,7 +134,7 @@ export async function addRole(
 
   // 5. Record it, so generators and doctor agree on what exists.
   await writeConfig(root, { ...config, roles });
-  wired.push("codeable.config.json");
+  wired.push("jinn-web.config.json");
 
   return {
     role,

@@ -3,7 +3,7 @@
  * single source of truth, and TypeScript forces every other catalog to match
  * its shape (see `messages/`).
  *
- * Add a locale with `codeable-web add-locale <code>` rather than by hand: the
+ * Add a locale with `jinn-web add-locale <code>` rather than by hand: the
  * generator clones the source catalog with `TODO(<code>):` markers so nothing
  * silently falls back to the source language.
  */

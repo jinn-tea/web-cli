@@ -15,7 +15,7 @@ import { version } from "./version.js";
  * off to a generator. All the logic lives in `generators/` and `engine/`, which
  * is what makes it unit-testable without spawning a CLI.
  */
-const program = new Command("codeable-web")
+const program = new Command("jinn-web")
   .description(
     "Scaffold and grow production-ready Next.js apps with the Codeable architecture.",
   )

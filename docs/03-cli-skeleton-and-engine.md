@@ -10,7 +10,7 @@ its engine `project_generator.dart` is 1381 lines; its command files are tiny).
 ## 1. Project bootstrap (exact steps)
 
 ```bash
-mkdir codeable-web-cli && cd codeable-web-cli
+mkdir jinn-web && cd jinn-web
 git init
 npm init -y
 npm i commander @clack/prompts picocolors eta ts-morph culori fs-extra execa update-notifier
@@ -22,10 +22,10 @@ npx tsc --init   # then apply tsconfig below
 
 ```jsonc
 {
-  "name": "codeable-web-cli",
+  "name": "jinn-web",
   "version": "0.1.0",
   "type": "module",
-  "bin": { "codeable-web": "./bin/codeable-web.js" },
+  "bin": { "jinn-web": "./bin/jinn-web.js" },
   "files": ["bin", "dist", "templates", "assets", "schema"],
   "engines": { "node": ">=20" },
   "scripts": {
@@ -39,7 +39,7 @@ npx tsc --init   # then apply tsconfig below
 }
 ```
 
-- `bin/codeable-web.js`: `#!/usr/bin/env node` + `import("../dist/cli.js")`.
+- `bin/jinn-web.js`: `#!/usr/bin/env node` + `import("../dist/cli.js")`.
 - `tsup.config.ts`: entry `src/cli.ts`, format `esm`, target `node20`, `clean: true`, and a
   `define` injecting the package version into `src/version.ts` (the `build_version` equivalent).
 - `tsconfig`: `strict`, `module: NodeNext`, `noUncheckedIndexedAccess`, `verbatimModuleSyntax`.
@@ -53,7 +53,7 @@ npx tsc --init   # then apply tsconfig below
 import { Command } from "commander";
 import { version } from "./version.js";
 
-const program = new Command("codeable-web")
+const program = new Command("jinn-web")
   .description("Scaffold and grow production-ready Next.js apps with the Codeable architecture.")
   .version(version)
   .option("--verbose", "noisy logging including all shell commands")
@@ -139,10 +139,10 @@ Contract for every helper:
    files so diffs stay minimal.
 4. **Failure = actionable** — if a wiring point can't be found (user restructured the file),
    print exactly what to add by hand and where, and continue with a warning; never corrupt.
-   (Comment anchors like `// codeable-web:routes` exist in the template as *fallback locators*
+   (Comment anchors like `// jinn-web:routes` exist in the template as *fallback locators*
    only.)
 
-JSON edits (`codeable.config.json`, `package.json`) go through parse → modify → stringify with
+JSON edits (`jinn-web.config.json`, `package.json`) go through parse → modify → stringify with
 2-space indent — never string surgery.
 
 ## 6. Transactional FS — `src/engine/fs-plan.ts` (the Flutter CLI has nothing like this)
@@ -170,9 +170,9 @@ type FileOp =
 
 ## 7. Project detection — `src/engine/project.ts`
 
-- `detectProject(cwd)`: walk up to find `codeable.config.json`; error with a helpful message if a
-  generator runs outside one ("Run inside a codeable-web project, or scaffold one with
-  `codeable-web create`."). `create` conversely refuses to run *inside* one.
+- `detectProject(cwd)`: walk up to find `jinn-web.config.json`; error with a helpful message if a
+  generator runs outside one ("Run inside a jinn-web project, or scaffold one with
+  `jinn-web create`."). `create` conversely refuses to run *inside* one.
 - `readConfig()/writeConfig()` — typed accessors; every generator that changes project shape
   (roles, locales) updates the config in the same transaction.
 - Discovery helpers used by prompts and doctor: `listRoles()` (config ∪ `src/features/*` dirs),

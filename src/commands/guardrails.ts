@@ -12,7 +12,7 @@ import * as ui from "../engine/ui.js";
 /**
  * `guardrails` — install the lint rules into a project.
  *
- * Deliberately works OUTSIDE codeable-web projects too: the main reason it
+ * Deliberately works OUTSIDE jinn-web projects too: the main reason it
  * exists is adopting the architecture in a codebase that predates the CLI,
  * which is exactly where the rules pay for themselves and exactly where
  * "hundreds of errors on day one" would get them switched off. Hence
@@ -45,7 +45,7 @@ async function detectRoles(root: string): Promise<string[]> {
     return [...config.roles, "common"];
   }
 
-  // Not a codeable-web project — infer from the folder structure.
+  // Not a jinn-web project — infer from the folder structure.
   const featuresDir = path.join(root, "src", "features");
   if (!(await fs.pathExists(featuresDir))) return [];
 
@@ -62,7 +62,7 @@ async function runGuardrails(flags: {
   yes?: boolean;
 }): Promise<void> {
   const root = process.cwd();
-  ui.intro("codeable-web guardrails");
+  ui.intro("jinn-web guardrails");
 
   if (!(await fs.pathExists(path.join(root, "package.json")))) {
     ui.fail("No package.json here — run this from the project root.");

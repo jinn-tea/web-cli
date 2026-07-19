@@ -1,6 +1,6 @@
 # 04 — `create`: Scaffolding a Project
 
-`codeable-web create` is the flagship command. End state: a directory that installs, compiles,
+`jinn-web create` is the flagship command. End state: a directory that installs, compiles,
 lints, builds, and passes `/web-audit` with zero findings — in one command, interactively or
 fully non-interactive.
 
@@ -9,7 +9,7 @@ fully non-interactive.
 ## 1. Signature
 
 ```
-codeable-web create [name]
+jinn-web create [name]
   -n, --name <name>         project name (kebab-case)          [positional or flag]
   -a, --app-name <name>     display name (e.g. "My App")
   -d, --description <text>  package.json description            (default: "A new Next.js app")
@@ -51,8 +51,8 @@ where description/output/roles are flag-only). Target dir exists and non-empty �
 3  renderTree(templates/app, vars)  → FileOp[] into staging       (doc 03 §4/§6)
 4  Per role: run the domain generator for the starter domain      (§6 — real generator, not a
    special template, exactly like the Flutter CLI reuses FeatureGenerator for role onboarding)
-5  Write codeable.config.json (+ record cliVersion)
-6  git init + initial commit "chore: scaffold with codeable-web-cli vX"   (unless --no-git)
+5  Write jinn-web.config.json (+ record cliVersion)
+6  git init + initial commit "chore: scaffold with jinn-web vX"   (unless --no-git)
 7  <pm> install                                                    (unless --no-install)
 8  npx playwright install --with-deps chromium                     (best-effort; warn on failure)
 9  Verify: tsc --noEmit && eslint (fail = CLI bug → rollback staging, exit 3 with report)
@@ -76,9 +76,9 @@ Next steps:
   cd my-app
   pnpm dev
 
-Generate a domain:      codeable-web domain orders --role admin
-Add a role later:       codeable-web role lager
-Check project health:   codeable-web doctor
+Generate a domain:      jinn-web domain orders --role admin
+Add a role later:       jinn-web role lager
+Check project health:   jinn-web doctor
 ```
 
 ## 5. Brand ramp generation (`src/engine/brand.ts`)

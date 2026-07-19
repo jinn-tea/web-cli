@@ -117,8 +117,8 @@ what makes server-side prefetching possible. A localStorage bearer token forfeit
 
 | Adding… | Goes |
 |---|---|
-| A domain | `codeable-web domain <name> --role <role>` (emits + wires routes, keys, nav, i18n) |
-| A role | `codeable-web role <name>`, then fix every compile error it surfaces |
+| A domain | `jinn-web domain <name> --role <role>` (emits + wires routes, keys, nav, i18n) |
+| A role | `jinn-web role <name>`, then fix every compile error it surfaces |
 | A page | `src/app/(app)/<name>/page.tsx` — thin; dispatch with `RoleScreens` if role-varying |
 | A shared component | 2+ domains in one role → `features/<role>/_shared/`; across roles → `components/shared/` |
 | A shadcn primitive | `npx shadcn@latest add <name>` |

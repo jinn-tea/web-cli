@@ -19,7 +19,7 @@ import type { MessageKey, MessageVars, Messages } from "./types";
 
 const CATALOGS: Record<Locale, Messages> = {
   en,
-  // codeable-web:locales — `add-locale` registers new catalogs here.
+  // jinn-web:locales — `add-locale` registers new catalogs here.
 };
 
 function lookup(catalog: Messages, key: string): string | undefined {

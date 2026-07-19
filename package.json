@@ -1,5 +1,5 @@
 {
-  "name": "codeable-web-cli",
+  "name": "jinn-web",
   "version": "1.0.0",
   "description": "Scaffold and grow production-ready Next.js apps with the Codeable web architecture.",
   "directories": {
@@ -54,7 +54,7 @@
     "vitest": "^4.1.10"
   },
   "bin": {
-    "codeable-web": "./bin/codeable-web.js"
+    "jinn-web": "./bin/jinn-web.js"
   },
   "files": [
     "bin",

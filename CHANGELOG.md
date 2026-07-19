@@ -11,6 +11,10 @@ an older version.
 
 ## [1.0.0] — unreleased
 
+Published as **`jinn-web`**. The architecture it generates is Codeable's
+convention set — the tool is a personal project and its name says so.
+
+
 First complete release. Everything below has been verified by generating a
 project and running the full gate on it, not by inspection.
 
