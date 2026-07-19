@@ -1,0 +1,60 @@
+import {
+  QueryClient,
+  defaultShouldDehydrateQuery,
+  isServer,
+} from "@tanstack/react-query";
+import { isAbortError, isApiError } from "@/lib/http";
+import { reportError } from "@/lib/reporting";
+
+/**
+ * One place for React Query behavior.
+ *
+ * `staleTime` above zero matters for server rendering: without it, a query
+ * hydrated from the server would refetch immediately on mount and waste the
+ * work the server already did.
+ */
+function makeQueryClient(): QueryClient {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 60_000,
+        gcTime: 5 * 60_000,
+        refetchOnWindowFocus: false,
+        // Retrying a 4xx just delays the error the user needs to see.
+        retry: (failureCount, error) => {
+          if (isAbortError(error)) return false;
+          if (isApiError(error) && error.statusCode < 500) return false;
+          return failureCount < 1;
+        },
+      },
+      dehydrate: {
+        shouldDehydrateQuery: (query) =>
+          defaultShouldDehydrateQuery(query) ||
+          query.state.status === "pending",
+      },
+    },
+  });
+}
+
+let browserQueryClient: QueryClient | undefined;
+
+/**
+ * Server: a FRESH client per request — a module-level singleton would leak one
+ * user's cache into another's request.
+ * Browser: one singleton, so navigations reuse the cache.
+ */
+export function getQueryClient(): QueryClient {
+  if (isServer) return makeQueryClient();
+  browserQueryClient ??= makeQueryClient();
+  return browserQueryClient;
+}
+
+/** Surface unexpected query failures to the reporting seam (not the user). */
+export function attachQueryErrorReporting(client: QueryClient): void {
+  client.getQueryCache().subscribe((event) => {
+    if (event.type === "updated" && event.query.state.status === "error") {
+      const error = event.query.state.error;
+      if (!isAbortError(error)) reportError(error, { scope: "query" });
+    }
+  });
+}
