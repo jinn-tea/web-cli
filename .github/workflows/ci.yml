@@ -112,3 +112,19 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: node scripts/verify-roundtrip.mjs
+
+  doctor:
+    name: doctor catches seeded breakage
+    runs-on: ubuntu-latest
+    # Breaks each invariant in turn and asserts the right check fires. A health
+    # check that never fails is indistinguishable from one that doesn't work.
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - run: node scripts/verify-doctor.mjs

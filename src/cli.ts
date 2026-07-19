@@ -1,6 +1,7 @@
 import { Command } from "commander";
 import pc from "picocolors";
 import { registerCreate } from "./commands/create.js";
+import { registerDoctor } from "./commands/doctor.js";
 import { registerDomain } from "./commands/domain.js";
 import { version } from "./version.js";
 
@@ -20,6 +21,7 @@ const program = new Command("codeable-web")
 
 registerCreate(program);
 registerDomain(program);
+registerDoctor(program);
 
 program.parseAsync(process.argv).catch((error: unknown) => {
   const message = error instanceof Error ? error.message : String(error);
