@@ -1,5 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { DEFAULT_AUTHED_ROUTE, DEFAULT_GUEST_ROUTE, PUBLIC_ROUTES } from "@/constants";
+import {
+  DEFAULT_AUTHED_ROUTE,
+  DEFAULT_GUEST_ROUTE,
+  PUBLIC_ROUTES,
+} from "@/constants";
 
 /**
  * Optimistic auth gate.
@@ -23,6 +27,16 @@ const SESSION_COOKIE = process.env.SESSION_COOKIE_NAME ?? "session";
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const hasSession = request.cookies.has(SESSION_COOKIE);
+
+  // The design-system reference is dev-only (the page itself 404s in
+  // production) and must be reachable without signing in.
+  if (
+    process.env.NODE_ENV !== "production" &&
+    pathname.startsWith("/design-system")
+  ) {
+    return NextResponse.next();
+  }
+
   const isPublic = PUBLIC_ROUTES.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`),
   );
