@@ -50,13 +50,7 @@ const SEMANTIC_TOKENS = [
   "ring",
 ] as const;
 
-const TONES: StatusTone[] = [
-  "success",
-  "warning",
-  "danger",
-  "info",
-  "neutral",
-];
+const TONES: StatusTone[] = ["success", "warning", "danger", "info", "neutral"];
 
 const TYPE_STEPS = [
   ["text-display", "Display — page hero"],
@@ -200,8 +194,18 @@ export function DesignSystemView() {
 
         <Section title="Metrics">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <StatCard label="Orders" value="1,284" delta={0.124} icon={Package} />
-            <StatCard label="Revenue" value="€48.2K" delta={0.032} icon={TrendingUp} />
+            <StatCard
+              label="Orders"
+              value="1,284"
+              delta={0.124}
+              icon={Package}
+            />
+            <StatCard
+              label="Revenue"
+              value="€48.2K"
+              delta={0.032}
+              icon={TrendingUp}
+            />
             <StatCard label="Returns" value="37" delta={-0.08} invertDelta />
             <StatCard label="Pending" value="12" hint="awaiting review" />
           </div>
@@ -209,10 +213,17 @@ export function DesignSystemView() {
 
         <Section title="Inputs">
           <div className="grid gap-4 sm:grid-cols-2">
-            <Input placeholder="Plain input" />
-            <PasswordInput placeholder="Password" />
+            {/* aria-label because this showcase has no visible labels — in a
+                real form these are always wrapped by a `components/form` field,
+                which associates a proper <label>. */}
+            <Input placeholder="Plain input" aria-label="Plain input" />
+            <PasswordInput placeholder="Password" aria-label="Password" />
             <SearchInput value={search} onChange={setSearch} />
-            <DatePicker value={date} onChange={setDate} placeholder="Pick a date" />
+            <DatePicker
+              value={date}
+              onChange={setDate}
+              placeholder="Pick a date"
+            />
             <Combobox
               options={OPTIONS}
               value={combo}
@@ -286,7 +297,10 @@ export function DesignSystemView() {
                     label: "Tracking",
                     value: (
                       <span className="flex min-w-0 items-center gap-1">
-                        <TruncatedText text="1Z999AA10123456784" className="text-data" />
+                        <TruncatedText
+                          text="1Z999AA10123456784"
+                          className="text-data"
+                        />
                         <CopyButton value="1Z999AA10123456784" />
                       </span>
                     ),
@@ -321,7 +335,9 @@ export function DesignSystemView() {
               </CardHeader>
               <CardContent>
                 <ErrorState
-                  error={new ApiError(503, "The service is temporarily unavailable.")}
+                  error={
+                    new ApiError(503, "The service is temporarily unavailable.")
+                  }
                   onRetry={() => undefined}
                 />
               </CardContent>

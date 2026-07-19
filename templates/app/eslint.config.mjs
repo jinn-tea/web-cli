@@ -103,6 +103,22 @@ const eslintConfig = defineConfig([
   },
 
   {
+    // Tooling configs and the e2e sweep run in Node, outside the app's runtime,
+    // and legitimately read raw env (CI flags, base URLs). They are not part of
+    // the shipped bundle, so `config/env.ts` doesn't apply to them.
+    name: "codeable/tooling",
+    files: [
+      "*.config.{ts,mjs,js}",
+      "e2e/**",
+      "src/**/*.test.{ts,tsx}",
+    ],
+    rules: {
+      "no-restricted-syntax": "off",
+      "no-console": "off",
+    },
+  },
+
+  {
     // shadcn primitives are generated — recolor via tokens in globals.css,
     // don't fight their conventions here.
     name: "codeable/generated-ui",
