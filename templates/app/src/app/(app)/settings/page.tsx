@@ -27,7 +27,10 @@ export default function SettingsPage() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <PageHeader title={t("settings.title")} description={t("settings.subtitle")} />
+      <PageHeader
+        title={t("settings.title")}
+        description={t("settings.subtitle")}
+      />
 
       <div className="flex flex-col gap-4">
         <Card>
@@ -60,7 +63,9 @@ export default function SettingsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-h4">{t("settings.preferences")}</CardTitle>
+            <CardTitle className="text-h4">
+              {t("settings.preferences")}
+            </CardTitle>
             <CardDescription>{t("settings.preferencesHint")}</CardDescription>
           </CardHeader>
           <CardContent className="flex items-center justify-between">

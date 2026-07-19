@@ -49,7 +49,9 @@ export const ROLE_LABEL_KEYS: Record<Role, MessageKey> = {
 };
 
 /** Roles allowed to invite other users. Extend the same way for any capability. */
-export const INVITE_CAPABLE_ROLES = ["admin"] as const satisfies readonly Role[];
+export const INVITE_CAPABLE_ROLES = [
+  "admin",
+] as const satisfies readonly Role[];
 
 export function canInvite(role: Role): boolean {
   return (INVITE_CAPABLE_ROLES as readonly Role[]).includes(role);

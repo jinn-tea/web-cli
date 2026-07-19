@@ -70,7 +70,9 @@ export function RowActions({
           </DropdownMenuItem>
         ))}
 
-        {destructive.length && regular.length ? <DropdownMenuSeparator /> : null}
+        {destructive.length && regular.length ? (
+          <DropdownMenuSeparator />
+        ) : null}
 
         {destructive.map((action) => (
           <DropdownMenuItem

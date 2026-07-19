@@ -1,6 +1,11 @@
 "use client";
 
-import { ApiError, setOnSessionExpired, setTokenRefresher, tokenStore } from "@/lib/http";
+import {
+  ApiError,
+  setOnSessionExpired,
+  setTokenRefresher,
+  tokenStore,
+} from "@/lib/http";
 import { useLocaleStore } from "@/i18n/locale-store";
 import { isLocale } from "@/i18n/locales";
 import { reportError } from "@/lib/reporting";
@@ -20,10 +25,7 @@ import type { SessionPayload } from "./types";
  * has to know about cookies.)
  */
 
-async function sessionFetch<T>(
-  url: string,
-  init?: RequestInit,
-): Promise<T> {
+async function sessionFetch<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, {
     ...init,
     headers: { "Content-Type": "application/json", ...init?.headers },
@@ -32,8 +34,7 @@ async function sessionFetch<T>(
   });
 
   const payload = (await res.json().catch(() => null)) as
-    | (T & { message?: string })
-    | null;
+    (T & { message?: string }) | null;
 
   if (!res.ok) {
     throw new ApiError(res.status, payload?.message ?? "Request failed");

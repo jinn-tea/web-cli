@@ -37,7 +37,7 @@ export function AvatarStack({
         <span
           className={cn(
             "bg-muted text-muted-foreground ring-card flex items-center justify-center rounded-full ring-2",
-            size === "sm" ? "size-6 text-[0.625rem]" : "size-8 text-caption",
+            size === "sm" ? "size-6 text-[0.625rem]" : "text-caption size-8",
           )}
         >
           +{overflow}

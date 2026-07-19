@@ -184,7 +184,6 @@ const en = {
       cancelled: "Cancelled",
     },
   },
-  // codeable-web:i18n — the `domain` generator appends new namespaces here.
 };
 
 export default en;

@@ -49,9 +49,7 @@ export function FilterChips({
                 : "bg-card hover:bg-accent hover:text-accent-foreground",
             )}
           >
-            {selected ? (
-              <Check className="size-3" aria-hidden="true" />
-            ) : null}
+            {selected ? <Check className="size-3" aria-hidden="true" /> : null}
             {chip.label}
             {chip.count !== undefined ? (
               <span

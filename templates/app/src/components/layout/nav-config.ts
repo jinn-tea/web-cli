@@ -27,6 +27,7 @@ export interface NavItem {
   roles: "all" | readonly Role[];
 }
 
+/** `codeable-web domain` appends new items to this array. */
 export const NAV_ITEMS: readonly NavItem[] = [
   {
     href: APP_ROUTES.dashboard,
@@ -46,7 +47,6 @@ export const NAV_ITEMS: readonly NavItem[] = [
     icon: Settings,
     roles: "all",
   },
-  // codeable-web:nav — the `domain` generator appends new items here.
 ];
 
 export function navItemsForRole(role: Role | null): readonly NavItem[] {

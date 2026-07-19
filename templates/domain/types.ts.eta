@@ -1,0 +1,17 @@
+import type { GenericStatus } from "@/lib/badges";
+
+/**
+ * Domain types stay private to the domain. A type only moves up to
+ * `src/types/` once a SECOND domain genuinely receives the same shape from the
+ * wire — promoting speculatively is how a shared folder turns into a dumping
+ * ground.
+ *
+ * Replace these fields with your real entity; the surrounding wiring doesn't
+ * care what they are.
+ */
+export interface <%= it.Entity %> {
+  id: string;
+  name: string;
+  status: GenericStatus;
+  createdAt: string;
+}

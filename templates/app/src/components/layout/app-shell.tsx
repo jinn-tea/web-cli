@@ -3,7 +3,12 @@
 import { Menu } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { LanguageSwitcher } from "@/components/shared/language-switcher";
 import { clientEnv } from "@/config/env";
 import { useTranslations } from "@/i18n";
@@ -27,7 +32,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Desktop sidebar */}
       <aside className="bg-sidebar hidden w-60 shrink-0 border-r md:flex md:flex-col">
         <div className="flex h-14 items-center border-b px-4">
-          <span className="text-h4 truncate">{clientEnv.NEXT_PUBLIC_APP_NAME}</span>
+          <span className="text-h4 truncate">
+            {clientEnv.NEXT_PUBLIC_APP_NAME}
+          </span>
         </div>
         <div className="flex-1 overflow-y-auto">
           <SidebarNav />

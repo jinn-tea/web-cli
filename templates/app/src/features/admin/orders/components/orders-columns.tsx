@@ -112,7 +112,9 @@ export function buildOrderColumns({
     },
     {
       id: "actions",
-      header: () => <span className="sr-only">{t("common.table.openMenu")}</span>,
+      header: () => (
+        <span className="sr-only">{t("common.table.openMenu")}</span>
+      ),
       cell: ({ row }) => (
         <div className="flex justify-end">
           <RowActions

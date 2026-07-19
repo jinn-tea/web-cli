@@ -1,0 +1,69 @@
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import { QUERY_KEYS, type RoleGroup } from "@/constants";
+import { <%= it.camelName %>Repository } from "@/features/<%= it.role %>/<%= it.name %>/api/<%= it.name %>.repository";
+import type {
+  Create<%= it.Entity %>Input,
+  Update<%= it.Entity %>Input,
+} from "@/features/<%= it.role %>/<%= it.name %>/validations/<%= it.name %>.schema";
+import { useApiMutation } from "@/lib/mutations";
+
+/**
+ * React Query bindings for the <%= it.name %> domain.
+ *
+ * Components never touch the repository or the transport — they call these
+ * hooks, which own caching, invalidation, and the standard toast/error
+ * behaviour via `useApiMutation`.
+ */
+
+interface ListParams {
+  page?: number;
+  q?: string;
+  sort?: string;
+}
+
+export function use<%= it.Name %>(group: RoleGroup | null, params: ListParams) {
+  return useQuery({
+    // Role-group-scoped: one role's cache can never serve another's rows.
+    queryKey: QUERY_KEYS.<%= it.camelName %>.list(group ?? "<%= it.firstRoleGroup %>", params),
+    // Forward `signal` so a superseded search is actually aborted, not merely
+    // ignored when it lands.
+    queryFn: ({ signal }) =>
+      <%= it.camelName %>Repository.list(group as RoleGroup, params, { signal }),
+    // Gate on the role group: firing with null would request "/null/<%= it.name %>".
+    enabled: group !== null,
+    // Keep the previous page on screen while the next loads, so paging and
+    // typing don't flash an empty table.
+    placeholderData: (previous) => previous,
+  });
+}
+
+export function useCreate<%= it.Entity %>(group: RoleGroup | null) {
+  return useApiMutation<unknown, Create<%= it.Entity %>Input>({
+    mutationFn: (input) =>
+      <%= it.camelName %>Repository.create(group as RoleGroup, input),
+    invalidate: [QUERY_KEYS.<%= it.camelName %>.all],
+    successMessage: "<%= it.camelName %>.created",
+    reportScope: "<%= it.name %>.create",
+  });
+}
+
+export function useUpdate<%= it.Entity %>(group: RoleGroup | null) {
+  return useApiMutation<unknown, { id: string; input: Update<%= it.Entity %>Input }>({
+    mutationFn: ({ id, input }) =>
+      <%= it.camelName %>Repository.update(group as RoleGroup, id, input),
+    invalidate: [QUERY_KEYS.<%= it.camelName %>.all],
+    successMessage: "<%= it.camelName %>.updated",
+    reportScope: "<%= it.name %>.update",
+  });
+}
+
+export function useDelete<%= it.Entity %>(group: RoleGroup | null) {
+  return useApiMutation<void, string>({
+    mutationFn: (id) => <%= it.camelName %>Repository.remove(group as RoleGroup, id),
+    invalidate: [QUERY_KEYS.<%= it.camelName %>.all],
+    successMessage: "<%= it.camelName %>.deleted",
+    reportScope: "<%= it.name %>.delete",
+  });
+}

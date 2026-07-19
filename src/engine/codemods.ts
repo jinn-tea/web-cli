@@ -206,11 +206,15 @@ export function addNamedImport(
   const names = existing.getNamedImports().map((named) => named.getName());
   if (names.includes(name)) return false;
 
-  existing.addNamedImport(name);
-  // Keep merged imports alphabetical so the diff stays minimal next time.
-  const sorted = [...names, name].sort((a, b) => a.localeCompare(b));
-  existing.removeNamedImports();
-  existing.addNamedImports(sorted);
+  // INSERT in place rather than removing and re-adding the whole list.
+  // Re-adding rebuilds each import from its name alone, which silently drops
+  // the `type` modifier — `type LucideIcon` would come back as a value import,
+  // changing runtime behaviour and breaking `verbatimModuleSyntax`.
+  const insertIndex = names.findIndex((existingName) => existingName > name);
+  existing.insertNamedImport(
+    insertIndex === -1 ? names.length : insertIndex,
+    name,
+  );
   normalize(file);
   return true;
 }

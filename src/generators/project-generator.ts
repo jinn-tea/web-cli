@@ -2,6 +2,7 @@ import fs from "fs-extra";
 import path from "node:path";
 import { buildBrandRamp } from "../engine/brand.js";
 import { commitFresh } from "../engine/fs-plan.js";
+import { formatSource } from "../engine/format.js";
 import { toKebab, toPascal, toTitle } from "../engine/naming.js";
 import { CONFIG_FILE, type ProjectConfig } from "../engine/project.js";
 import {
@@ -189,13 +190,19 @@ export async function generateProject(options: CreateOptions): Promise<void> {
     }
 
     // 4. Surgical edits to copied files.
+    //
+    // Each edit is re-formatted afterwards. Removing an entry can leave a file
+    // valid but no longer canonical — deleting one name from a wrapped import
+    // leaves the remaining three spread over five lines where Prettier would
+    // put them on one. That's invisible until a codemod later reformats the
+    // file and the diff shows changes nobody made.
     const editFile = async (
       relative: string,
       edit: (source: string) => string,
     ) => {
       const target = path.join(staging, relative);
       const source = await fs.readFile(target, "utf8");
-      await fs.writeFile(target, edit(source), "utf8");
+      await fs.writeFile(target, await formatSource(edit(source), target), "utf8");
     };
 
     await editFile("package.json", (source) =>
@@ -245,9 +252,11 @@ export async function generateProject(options: CreateOptions): Promise<void> {
       "utf8",
     );
     for (const locale of locales.slice(1)) {
+      const target = path.join(staging, `src/i18n/messages/${locale}.ts`);
       await fs.outputFile(
-        path.join(staging, `src/i18n/messages/${locale}.ts`),
-        seedLocaleCatalog(catalogSource, locale),
+        target,
+        // Seeded by string substitution, so format it into canonical shape.
+        await formatSource(seedLocaleCatalog(catalogSource, locale), target),
       );
     }
 

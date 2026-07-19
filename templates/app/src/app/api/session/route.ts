@@ -36,10 +36,7 @@ const loginSchema = z.object({
 export async function POST(request: Request) {
   const parsed = loginSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {
-    return NextResponse.json(
-      { message: "errors.validation" },
-      { status: 422 },
-    );
+    return NextResponse.json({ message: "errors.validation" }, { status: 422 });
   }
 
   try {

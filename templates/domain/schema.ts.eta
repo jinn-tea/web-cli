@@ -1,0 +1,36 @@
+import { z } from "zod";
+import { GENERIC_STATUSES } from "@/lib/badges";
+import { nameField } from "@/validations/fields";
+
+/**
+ * Request schemas — the single source of truth for this domain's write shapes.
+ *
+ * The FORM validates with these and the REPOSITORY re-parses with the same
+ * schema before the request leaves, so a form and its endpoint can't drift.
+ * Messages are i18n keys (see `validations/fields`).
+ */
+
+export const create<%= it.Entity %>Schema = z.object({
+  name: nameField,
+  // z.enum over the same const tuple the union comes from — one source, so a
+  // new status can't be valid in the type system and invalid at runtime.
+  status: z.enum(GENERIC_STATUSES),
+});
+
+/**
+ * Two types, because `z.coerce` and `.transform` make a schema's INPUT differ
+ * from its OUTPUT (a number input hands over a string; the schema converts it).
+ *
+ *   *FormValues → what the form holds while the user types (z.input)
+ *   *Input      → what the API receives after validation (z.output)
+ *
+ * `useForm<FormValues, unknown, Input>` connects them. Getting this wrong is
+ * the usual cause of "Resolver is not assignable" on any form with a number or
+ * a date.
+ */
+export type Create<%= it.Entity %>FormValues = z.input<typeof create<%= it.Entity %>Schema>;
+export type Create<%= it.Entity %>Input = z.output<typeof create<%= it.Entity %>Schema>;
+
+export const update<%= it.Entity %>Schema = create<%= it.Entity %>Schema.partial();
+
+export type Update<%= it.Entity %>Input = z.output<typeof update<%= it.Entity %>Schema>;

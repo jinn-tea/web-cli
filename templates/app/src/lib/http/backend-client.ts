@@ -82,7 +82,8 @@ function buildHeaders(auth: boolean, isFormData: boolean): HeadersInit {
 async function request<T>(path: string, options: InternalOptions): Promise<T> {
   const { method, body, auth = true, signal, _retried = false } = options;
 
-  const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
+  const isFormData =
+    typeof FormData !== "undefined" && body instanceof FormData;
 
   let res: Response;
   try {
@@ -101,7 +102,9 @@ async function request<T>(path: string, options: InternalOptions): Promise<T> {
     throw new NetworkError();
   }
 
-  const envelope = (await res.json().catch(() => null)) as ApiEnvelope<T> | null;
+  const envelope = (await res
+    .json()
+    .catch(() => null)) as ApiEnvelope<T> | null;
   const failed = !res.ok || (envelope?.error ?? null) !== null;
 
   if (failed) {

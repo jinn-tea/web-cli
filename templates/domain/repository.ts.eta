@@ -1,0 +1,115 @@
+import type { RoleGroup } from "@/constants";
+import {
+  backendClient,
+  normalizePagination,
+  type Paginated,
+  type RawPagination,
+  type RequestOptions,
+} from "@/lib/http";
+import { <%= it.camelName %>Endpoints } from "@/features/<%= it.role %>/<%= it.name %>/constants";
+import {
+  create<%= it.Entity %>Schema,
+  update<%= it.Entity %>Schema,
+  type Create<%= it.Entity %>Input,
+  type Update<%= it.Entity %>Input,
+} from "@/features/<%= it.role %>/<%= it.name %>/validations/<%= it.name %>.schema";
+import type { <%= it.Entity %> } from "@/features/<%= it.role %>/<%= it.name %>/types";
+
+/**
+ * The repository — this domain's boundary with the backend.
+ *
+ * It is PURE: validate input with the schema → call the transport → return a
+ * typed domain object. No React, no toasts, no token handling, no caching.
+ * That's what makes it trivially testable and callable from anywhere.
+ *
+ * Note `signal` is threaded through every read. Without it React Query cannot
+ * actually abort a superseded request, so a slow response from an old search
+ * can land after a newer one and overwrite it.
+ */
+
+interface ListParams {
+  page?: number;
+  q?: string;
+  sort?: string;
+}
+
+/** Raw list shape from the backend (snake_case pagination). */
+interface Raw<%= it.Name %>List {
+  items: <%= it.Entity %>[];
+  pagination: RawPagination;
+}
+
+function buildQuery(params: ListParams): string {
+  const search = new URLSearchParams();
+  if (params.page && params.page > 1) search.set("page", String(params.page));
+  if (params.q) search.set("q", params.q);
+  if (params.sort) search.set("sort", params.sort);
+  const query = search.toString();
+  return query ? `?${query}` : "";
+}
+
+export const <%= it.camelName %>Repository = {
+  async list(
+    group: RoleGroup,
+    params: ListParams = {},
+    opts?: RequestOptions,
+  ): Promise<Paginated<<%= it.Entity %>>> {
+    const raw = await backendClient.get<Raw<%= it.Name %>List>(
+      `${<%= it.camelName %>Endpoints(group).list}${buildQuery(params)}`,
+      opts,
+    );
+    // snake_case → camelCase happens HERE, at the edge, so no component ever
+    // sees `current_page`.
+    return {
+      items: raw.items ?? [],
+      pagination: normalizePagination(raw.pagination ?? {}),
+    };
+  },
+
+  detail(
+    group: RoleGroup,
+    id: string,
+    opts?: RequestOptions,
+  ): Promise<<%= it.Entity %>> {
+    return backendClient.get<<%= it.Entity %>>(
+      <%= it.camelName %>Endpoints(group).detail(id),
+      opts,
+    );
+  },
+
+  create(
+    group: RoleGroup,
+    input: Create<%= it.Entity %>Input,
+    opts?: RequestOptions,
+  ): Promise<<%= it.Entity %>> {
+    // Parse before sending: the form validated already, but a repository that
+    // trusts its caller is one refactor away from posting garbage.
+    const body = create<%= it.Entity %>Schema.parse(input);
+    return backendClient.post<<%= it.Entity %>>(
+      <%= it.camelName %>Endpoints(group).create,
+      body,
+      opts,
+    );
+  },
+
+  update(
+    group: RoleGroup,
+    id: string,
+    input: Update<%= it.Entity %>Input,
+    opts?: RequestOptions,
+  ): Promise<<%= it.Entity %>> {
+    const body = update<%= it.Entity %>Schema.parse(input);
+    return backendClient.patch<<%= it.Entity %>>(
+      <%= it.camelName %>Endpoints(group).update(id),
+      body,
+      opts,
+    );
+  },
+
+  remove(group: RoleGroup, id: string, opts?: RequestOptions): Promise<void> {
+    return backendClient.delete<void>(
+      <%= it.camelName %>Endpoints(group).remove(id),
+      opts,
+    );
+  },
+};

@@ -1,0 +1,20 @@
+import type { RoleGroup } from "@/constants";
+
+/**
+ * Every endpoint this domain touches — written down exactly once.
+ *
+ * Paths are built from a `RoleGroup`, not hardcoded per role: when two roles
+ * hit the same resource under different prefixes, ONE parameterized repository
+ * serves both. Forking a repository per role is how a codebase ends up with
+ * four copies of the same CRUD drifting apart.
+ */
+export const <%= it.camelName %>Endpoints = (group: RoleGroup) => ({
+  list: `/${group}/<%= it.name %>`,
+  detail: (id: string) => `/${group}/<%= it.name %>/${id}`,
+  create: `/${group}/<%= it.name %>`,
+  update: (id: string) => `/${group}/<%= it.name %>/${id}`,
+  remove: (id: string) => `/${group}/<%= it.name %>/${id}`,
+});
+
+/** Rows per page for this domain's list. */
+export const <%= it.constantName %>_PAGE_SIZE = 20;

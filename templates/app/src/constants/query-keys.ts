@@ -16,13 +16,13 @@ import type { RoleGroup } from "./roles";
  *   detail(group, id)→ one entity
  */
 
+/** `codeable-web domain` appends new key factories to this object. */
 export const QUERY_KEYS = {
   session: {
     all: ["session"] as const,
     currentUser: () => [...QUERY_KEYS.session.all, "current-user"] as const,
   },
   orders: resourceKeys("orders"),
-  // codeable-web:query-keys — the `domain` generator appends new factories here.
 } as const;
 
 /**

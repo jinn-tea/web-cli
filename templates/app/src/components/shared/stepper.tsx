@@ -31,12 +31,16 @@ export function Stepper({ steps, current, className }: StepperProps) {
         const isCurrent = index === current;
 
         return (
-          <li key={step.label} className="flex min-w-0 flex-1 items-center gap-2">
+          <li
+            key={step.label}
+            className="flex min-w-0 flex-1 items-center gap-2"
+          >
             <span
               aria-current={isCurrent ? "step" : undefined}
               className={cn(
                 "text-caption flex size-6 shrink-0 items-center justify-center rounded-full border font-medium tabular-nums",
-                isDone && "bg-primary text-primary-foreground border-transparent",
+                isDone &&
+                  "bg-primary text-primary-foreground border-transparent",
                 isCurrent && "border-primary text-primary",
                 !isDone && !isCurrent && "text-muted-foreground",
               )}

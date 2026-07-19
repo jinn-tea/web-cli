@@ -9,11 +9,7 @@ import { RequireAuth } from "@/lib/auth";
  * cookie-level decision, and this makes the authoritative client-side one. The
  * BACKEND is the security boundary; both of these only decide what to render.
  */
-export default function AppLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <RequireAuth>
       <AppShell>{children}</AppShell>

@@ -11,7 +11,9 @@ import { z } from "zod";
  */
 
 const serverSchema = z.object({
-  NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+  NODE_ENV: z
+    .enum(["development", "test", "production"])
+    .default("development"),
   /**
    * Upstream backend base URL used by the `/api/session` route handlers
    * (server-side only). Defaults to the public URL so a single-origin setup

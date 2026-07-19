@@ -60,9 +60,9 @@ export function optionalText(schema: z.ZodTypeAny = z.string()) {
 }
 
 /** Confirm-password refinement for any schema with `password`/`confirmPassword`. */
-export function withPasswordConfirmation<
-  T extends z.ZodObject<z.ZodRawShape>,
->(schema: T) {
+export function withPasswordConfirmation<T extends z.ZodObject<z.ZodRawShape>>(
+  schema: T,
+) {
   return schema.refine(
     (data) =>
       (data as { password?: string; confirmPassword?: string }).password ===

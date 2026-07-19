@@ -5,7 +5,11 @@
  * export is NOT a usage — `codeable-web doctor` checks real call sites when it
  * hunts dead code.
  */
-export { StatusBadge, type StatusTone, type StatusBadgeProps } from "./status-badge";
+export {
+  StatusBadge,
+  type StatusTone,
+  type StatusBadgeProps,
+} from "./status-badge";
 export { TruncatedText, type TruncatedTextProps } from "./truncated-text";
 export { EmptyState, type EmptyStateProps } from "./empty-state";
 export { ErrorState, type ErrorStateProps } from "./error-state";
@@ -20,17 +24,22 @@ export { LanguageSwitcher } from "./language-switcher";
 export { UserAvatar, type UserAvatarProps } from "./user-avatar";
 export { AvatarStack, type AvatarStackProps } from "./avatar-stack";
 export { StatCard, type StatCardProps } from "./stat-card";
-export {
-  DescriptionList,
-  type DescriptionItem,
-} from "./description-list";
+export { DescriptionList, type DescriptionItem } from "./description-list";
 export { CopyButton, type CopyButtonProps } from "./copy-button";
 export { PasswordInput, type PasswordInputProps } from "./password-input";
 export { DatePicker, type DatePickerProps } from "./date-picker";
 export { Combobox, type ComboboxOption, type ComboboxProps } from "./combobox";
 export { MultiSelect, type MultiSelectProps } from "./multi-select";
-export { FilterChips, type FilterChip, type FilterChipsProps } from "./filter-chips";
-export { SegmentedTabs, type SegmentedOption, type SegmentedTabsProps } from "./segmented-tabs";
+export {
+  FilterChips,
+  type FilterChip,
+  type FilterChipsProps,
+} from "./filter-chips";
+export {
+  SegmentedTabs,
+  type SegmentedOption,
+  type SegmentedTabsProps,
+} from "./segmented-tabs";
 export { Stepper, type Step, type StepperProps } from "./stepper";
 export { SettingsSection, SettingsRow } from "./settings-section";
 export { TableSkeletonRows } from "./table-skeleton-rows";

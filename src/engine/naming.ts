@@ -46,6 +46,22 @@ export function toConstant(value: string): string {
   return words(value).join("_").toUpperCase();
 }
 
+/**
+ * `orders` → `order`, `vehicle-types` → `vehicle-type`, `addresses` → `address`.
+ *
+ * Domains are named in the plural (they're collections) but their ENTITY type
+ * is singular — `Order`, not `Orders`. Deliberately simple English rules: this
+ * only has to produce a sensible default for a type name the developer can
+ * rename, not be linguistically complete.
+ */
+export function toSingular(value: string): string {
+  if (/ies$/i.test(value)) return value.replace(/ies$/i, "y");
+  if (/(s|x|z|ch|sh)es$/i.test(value)) return value.replace(/es$/i, "");
+  if (/ss$/i.test(value)) return value;
+  if (/s$/i.test(value)) return value.replace(/s$/i, "");
+  return value;
+}
+
 export interface ValidationResult {
   ok: boolean;
   /** Why it failed, phrased as advice rather than a regex dump. */

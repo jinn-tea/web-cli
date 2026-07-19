@@ -90,7 +90,10 @@ export function Combobox({
           <span className="truncate">
             {selected?.label ?? placeholder ?? t("common.actions.search")}
           </span>
-          <ChevronsUpDown className="size-4 shrink-0 opacity-50" aria-hidden="true" />
+          <ChevronsUpDown
+            className="size-4 shrink-0 opacity-50"
+            aria-hidden="true"
+          />
         </Button>
       </PopoverTrigger>
 

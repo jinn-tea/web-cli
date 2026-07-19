@@ -48,7 +48,10 @@ export function StatCard({
         <div className="flex items-center justify-between gap-2">
           <span className="text-overline truncate">{label}</span>
           {Icon ? (
-            <Icon className="text-muted-foreground size-4 shrink-0" aria-hidden="true" />
+            <Icon
+              className="text-muted-foreground size-4 shrink-0"
+              aria-hidden="true"
+            />
           ) : null}
         </div>
 
@@ -62,7 +65,9 @@ export function StatCard({
           <span
             className={cn(
               "text-caption flex items-center gap-1",
-              isGood ? "text-success-subtle-foreground" : "text-danger-subtle-foreground",
+              isGood
+                ? "text-success-subtle-foreground"
+                : "text-danger-subtle-foreground",
             )}
           >
             <DeltaIcon className="size-3" aria-hidden="true" />

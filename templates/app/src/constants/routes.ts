@@ -11,11 +11,11 @@ export const AUTH_ROUTES = {
   resetPassword: "/reset-password",
 } as const;
 
+/** `codeable-web domain` appends new routes to this object. */
 export const APP_ROUTES = {
   dashboard: "/dashboard",
   orders: "/orders",
   settings: "/settings",
-  // codeable-web:routes — the `domain` generator appends new routes here.
 } as const;
 
 export const ROUTES = { ...AUTH_ROUTES, ...APP_ROUTES } as const;

@@ -57,8 +57,7 @@ export type StatusTone = NonNullable<
 >;
 
 export interface StatusBadgeProps
-  extends React.ComponentProps<"span">,
-    VariantProps<typeof badgeVariants> {
+  extends React.ComponentProps<"span">, VariantProps<typeof badgeVariants> {
   /** Hide the dot only where the label alone is unmistakable. */
   showDot?: boolean;
 }

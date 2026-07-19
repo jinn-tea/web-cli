@@ -65,7 +65,9 @@ export function DatePicker({
         >
           <CalendarIcon className="size-4 shrink-0" aria-hidden="true" />
           <span className="truncate">
-            {value ? formatDate(value) : (placeholder ?? t("common.actions.search"))}
+            {value
+              ? formatDate(value)
+              : (placeholder ?? t("common.actions.search"))}
           </span>
         </Button>
       </PopoverTrigger>

@@ -115,7 +115,10 @@ export function MultiSelect({
               </>
             )}
           </span>
-          <ChevronsUpDown className="size-4 shrink-0 opacity-50" aria-hidden="true" />
+          <ChevronsUpDown
+            className="size-4 shrink-0 opacity-50"
+            aria-hidden="true"
+          />
         </Button>
       </PopoverTrigger>
 
@@ -139,11 +142,15 @@ export function MultiSelect({
                   <Check
                     className={cn(
                       "size-4",
-                      value.includes(option.value) ? "opacity-100" : "opacity-0",
+                      value.includes(option.value)
+                        ? "opacity-100"
+                        : "opacity-0",
                     )}
                     aria-hidden="true"
                   />
-                  <span className="min-w-0 flex-1 truncate">{option.label}</span>
+                  <span className="min-w-0 flex-1 truncate">
+                    {option.label}
+                  </span>
                 </CommandItem>
               ))}
             </CommandGroup>

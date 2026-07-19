@@ -30,11 +30,10 @@ import { reportError } from "@/lib/reporting";
  * via `options` — this adds behavior, it doesn't take any away.
  */
 
-export interface ApiMutationOptions<TData, TVariables, TContext>
-  extends Omit<
-    UseMutationOptions<TData, unknown, TVariables, TContext>,
-    "mutationFn"
-  > {
+export interface ApiMutationOptions<TData, TVariables, TContext> extends Omit<
+  UseMutationOptions<TData, unknown, TVariables, TContext>,
+  "mutationFn"
+> {
   mutationFn: (variables: TVariables) => Promise<TData>;
   /** Query keys to invalidate on success. */
   invalidate?: QueryKey[];

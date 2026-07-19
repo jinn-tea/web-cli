@@ -27,7 +27,10 @@ import { reportError } from "@/lib/reporting";
 export async function POST(request: Request) {
   const refreshToken = await readRefreshCookie();
   if (!refreshToken) {
-    return NextResponse.json({ message: "auth.sessionExpired" }, { status: 401 });
+    return NextResponse.json(
+      { message: "auth.sessionExpired" },
+      { status: 401 },
+    );
   }
 
   const acceptLanguage = request.headers.get("accept-language") ?? undefined;

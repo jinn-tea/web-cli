@@ -1,0 +1,143 @@
+"use client";
+
+import { Plus } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { DataTable } from "@/components/shared/data-table";
+import { EmptyState } from "@/components/shared/empty-state";
+import { PageHeader } from "@/components/shared/page-header";
+import { SearchInput } from "@/components/shared/search-input";
+import { useTableParams } from "@/hooks/use-table-params";
+import { useTranslations } from "@/i18n";
+import { useRoleGroup } from "@/lib/auth";
+import { <%= it.constantName %>_PAGE_SIZE } from "@/features/<%= it.role %>/<%= it.name %>/constants";
+import { build<%= it.Name %>Columns } from "@/features/<%= it.role %>/<%= it.name %>/components/<%= it.name %>-columns";
+import { <%= it.Entity %>FormDialog } from "@/features/<%= it.role %>/<%= it.name %>/components/<%= it.name %>-form-dialog";
+import {
+  useDelete<%= it.Entity %>,
+  use<%= it.Name %>,
+} from "@/features/<%= it.role %>/<%= it.name %>/services/use-<%= it.name %>";
+import type { <%= it.Entity %> } from "@/features/<%= it.role %>/<%= it.name %>/types";
+
+/**
+ * The list screen.
+ *
+ * Note what ISN'T here: no fetch, no loading/error/empty branching, no
+ * pagination wiring, no sort state. `DataTable` owns the states,
+ * `useTableParams` owns the URL state, and the hooks own the data — so the
+ * screen is only composition plus the decisions that are genuinely
+ * domain-specific.
+ */
+export function <%= it.Name %>Screen() {
+  const t = useTranslations();
+  const group = useRoleGroup();
+  const { params, queryParams, setPage, setQuery, setSort } = useTableParams();
+
+  const [editing, setEditing] = useState<<%= it.Entity %> | null>(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [deleting, setDeleting] = useState<<%= it.Entity %> | null>(null);
+
+  const listQuery = use<%= it.Name %>(group, queryParams);
+  const deleteMutation = useDelete<%= it.Entity %>(group);
+
+  const columns = useMemo(
+    () =>
+      build<%= it.Name %>Columns({
+        t,
+        sort: params.sort,
+        onSortChange: setSort,
+        onEdit: (item) => {
+          setEditing(item);
+          setIsFormOpen(true);
+        },
+        onDelete: setDeleting,
+      }),
+    [t, params.sort, setSort],
+  );
+
+  const handleCreate = () => {
+    setEditing(null);
+    setIsFormOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (!deleting) return;
+    deleteMutation.mutate(deleting.id, { onSuccess: () => setDeleting(null) });
+  };
+
+  return (
+    <>
+      <PageHeader
+        title={t("<%= it.camelName %>.title")}
+        description={t("<%= it.camelName %>.subtitle")}
+        action={
+          <Button onClick={handleCreate}>
+            <Plus className="size-4" aria-hidden="true" />
+            {t("<%= it.camelName %>.create")}
+          </Button>
+        }
+      />
+
+      <div className="mb-3 max-w-xs">
+        <SearchInput
+          value={params.q}
+          onChange={setQuery}
+          placeholder={t("<%= it.camelName %>.searchPlaceholder")}
+        />
+      </div>
+
+      <DataTable
+        columns={columns}
+        data={listQuery.data?.items ?? []}
+        isLoading={listQuery.isLoading}
+        isFetching={listQuery.isFetching}
+        isError={listQuery.isError}
+        error={listQuery.error}
+        onRetry={() => void listQuery.refetch()}
+        pagination={listQuery.data?.pagination}
+        pageSize={<%= it.constantName %>_PAGE_SIZE}
+        onPageChange={setPage}
+        getRowId={(item) => item.id}
+        emptyState={
+          // "No results for this filter" and "nothing exists yet" need
+          // different next steps — don't collapse them into one message.
+          params.q ? (
+            <EmptyState
+              title={t("common.states.noResults")}
+              hint={t("common.states.noResultsHint")}
+            />
+          ) : (
+            <EmptyState
+              title={t("<%= it.camelName %>.empty")}
+              hint={t("<%= it.camelName %>.emptyHint")}
+              action={
+                <Button onClick={handleCreate}>
+                  <Plus className="size-4" aria-hidden="true" />
+                  {t("<%= it.camelName %>.create")}
+                </Button>
+              }
+            />
+          )
+        }
+      />
+
+      <<%= it.Entity %>FormDialog
+        open={isFormOpen}
+        onOpenChange={setIsFormOpen}
+        item={editing}
+      />
+
+      <ConfirmDialog
+        open={deleting !== null}
+        onOpenChange={(open) => !open && setDeleting(null)}
+        title={t("<%= it.camelName %>.deleteTitle")}
+        description={t("common.confirm.deleteDescription")}
+        confirmLabel={t("common.actions.delete")}
+        destructive
+        isPending={deleteMutation.isPending}
+        onConfirm={handleConfirmDelete}
+      />
+    </>
+  );
+}

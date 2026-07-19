@@ -1,0 +1,114 @@
+"use client";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { FormActions } from "@/components/form/form-actions";
+import { FormDialog } from "@/components/form/form-dialog";
+import { SelectField } from "@/components/form/select-field";
+import { TextField } from "@/components/form/text-field";
+import { useTranslations } from "@/i18n";
+import { useRoleGroup } from "@/lib/auth";
+import { GENERIC_STATUSES } from "@/lib/badges";
+import {
+  create<%= it.Entity %>Schema,
+  type Create<%= it.Entity %>FormValues,
+  type Create<%= it.Entity %>Input,
+} from "@/features/<%= it.role %>/<%= it.name %>/validations/<%= it.name %>.schema";
+import {
+  useCreate<%= it.Entity %>,
+  useUpdate<%= it.Entity %>,
+} from "@/features/<%= it.role %>/<%= it.name %>/services/use-<%= it.name %>";
+import type { <%= it.Entity %> } from "@/features/<%= it.role %>/<%= it.name %>/types";
+
+/**
+ * Create/edit dialog. One component serves both modes — an "edit" dialog is the
+ * same form with different defaults, and keeping them together is what stops
+ * the two drifting apart.
+ */
+export function <%= it.Entity %>FormDialog({
+  open,
+  onOpenChange,
+  item,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  /** Present = edit mode. */
+  item?: <%= it.Entity %> | null;
+}) {
+  const t = useTranslations();
+  const group = useRoleGroup();
+  const createMutation = useCreate<%= it.Entity %>(group);
+  const updateMutation = useUpdate<%= it.Entity %>(group);
+
+  const isEdit = Boolean(item);
+  const isPending = createMutation.isPending || updateMutation.isPending;
+
+  // <FormValues, context, TransformedValues> — see the schema file for why the
+  // input and output types differ.
+  const form = useForm<Create<%= it.Entity %>FormValues, unknown, Create<%= it.Entity %>Input>({
+    resolver: zodResolver(create<%= it.Entity %>Schema),
+    defaultValues: { name: "", status: "draft" },
+    mode: "onBlur",
+    reValidateMode: "onChange",
+  });
+
+  // Re-seed when the dialog opens or the target changes; a form kept mounted
+  // across openings would otherwise show the previous record's values.
+  useEffect(() => {
+    if (!open) return;
+    form.reset(
+      item
+        ? { name: item.name, status: item.status }
+        : { name: "", status: "draft" },
+    );
+  }, [open, item, form]);
+
+  const onSubmit = form.handleSubmit((values) => {
+    const onSuccess = () => onOpenChange(false);
+    if (item) {
+      updateMutation.mutate({ id: item.id, input: values }, { onSuccess });
+    } else {
+      createMutation.mutate(values, { onSuccess });
+    }
+  });
+
+  const statusOptions = GENERIC_STATUSES.map((status) => ({
+    value: status,
+    label: t(`<%= it.camelName %>.status.${status}`),
+  }));
+
+  return (
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={
+        isEdit
+          ? t("<%= it.camelName %>.editTitle")
+          : t("<%= it.camelName %>.createTitle")
+      }
+    >
+      <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
+        <TextField
+          control={form.control}
+          name="name"
+          label={t("<%= it.camelName %>.columns.name")}
+          autoFocus
+        />
+        <SelectField
+          control={form.control}
+          name="status"
+          label={t("<%= it.camelName %>.columns.status")}
+          options={statusOptions}
+        />
+        <FormActions
+          isPending={isPending}
+          onCancel={() => onOpenChange(false)}
+          submitLabel={
+            isEdit ? t("common.actions.save") : t("common.actions.create")
+          }
+        />
+      </form>
+    </FormDialog>
+  );
+}

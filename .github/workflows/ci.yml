@@ -96,3 +96,19 @@ jobs:
           cache-dependency-path: package-lock.json
       - run: npm ci
       - run: node scripts/verify-create.mjs ${{ matrix.scenario }}
+
+  roundtrip:
+    name: domain → remove-domain is exact
+    runs-on: ubuntu-latest
+    # Hashes the whole source tree before and after, so a registry the removal
+    # forgets to unwire is caught even though nobody wrote an assertion for it.
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - run: node scripts/verify-roundtrip.mjs

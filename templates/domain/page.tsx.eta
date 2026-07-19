@@ -1,0 +1,35 @@
+"use client";
+
+<% if (it.isCommon) { %>import { <%= it.Name %>Screen } from "@/features/common/<%= it.name %>/components/<%= it.name %>-screen";
+
+/**
+ * Shared by every role, so the page renders one surface.
+ *
+ * If a role later needs its own version, swap this for
+ * `<RoleScreens screens={{ … }} />` — a `Record<Role, ReactNode>` the compiler
+ * forces you to complete.
+ */
+export default function <%= it.Name %>Page() {
+  return <<%= it.Name %>Screen />;
+}
+<% } else { %>import { <%= it.Name %>Screen } from "@/features/<%= it.role %>/<%= it.name %>/components/<%= it.name %>-screen";
+import { ROLES } from "@/constants";
+import { RequireRole } from "@/lib/auth";
+
+/**
+ * Owned by the "<%= it.role %>" role, so the page guards rather than dispatching.
+ *
+ * ⚠️ `RequireRole` is UX, not security — it decides what to RENDER. The backend
+ * authorizes every request.
+ *
+ * When a second role needs this screen, move the shared pieces to
+ * `features/common/<%= it.name %>` and swap this for `<RoleScreens>`.
+ */
+export default function <%= it.Name %>Page() {
+  return (
+    <RequireRole roles={ROLES.filter((role) => role === "<%= it.role %>")}>
+      <<%= it.Name %>Screen />
+    </RequireRole>
+  );
+}
+<% } %>

@@ -29,13 +29,7 @@ export async function serverRequest<T>(
   path: string,
   options: ServerRequestOptions = {},
 ): Promise<T> {
-  const {
-    method = "GET",
-    body,
-    accessToken,
-    acceptLanguage,
-    signal,
-  } = options;
+  const { method = "GET", body, accessToken, acceptLanguage, signal } = options;
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -57,7 +51,9 @@ export async function serverRequest<T>(
     throw new NetworkError();
   }
 
-  const envelope = (await res.json().catch(() => null)) as ApiEnvelope<T> | null;
+  const envelope = (await res
+    .json()
+    .catch(() => null)) as ApiEnvelope<T> | null;
 
   if (!res.ok || (envelope?.error ?? null) !== null) {
     throw new ApiError(

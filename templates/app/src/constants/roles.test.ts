@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { ROLES, ROLE_LABEL_KEYS, ROLE_TO_GROUP, canInvite, isRole, roleGroupFor } from "./roles";
+import {
+  ROLES,
+  ROLE_LABEL_KEYS,
+  ROLE_TO_GROUP,
+  canInvite,
+  isRole,
+  roleGroupFor,
+} from "./roles";
 
 describe("roles", () => {
   it("maps every role to a group and a label key", () => {

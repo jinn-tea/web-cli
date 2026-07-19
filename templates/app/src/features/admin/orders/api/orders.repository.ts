@@ -78,11 +78,7 @@ export const ordersRepository = {
     // Parse before sending: the form validated already, but a repository that
     // trusts its caller is one refactor away from posting garbage.
     const body = createOrderSchema.parse(input);
-    return backendClient.post<Order>(
-      ordersEndpoints(group).create,
-      body,
-      opts,
-    );
+    return backendClient.post<Order>(ordersEndpoints(group).create, body, opts);
   },
 
   update(
