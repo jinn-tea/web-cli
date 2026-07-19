@@ -8,6 +8,14 @@ command and deliberately better where that one is weak.
 npx codeable-web-cli create my-app --roles admin,member --locales en,de --brand "#2563EB"
 ```
 
+```bash
+codeable-web domain orders --role admin   # 9 files, 6 registries wired
+codeable-web role lager                   # + the compiler's decision checklist
+codeable-web add-locale de                # catalog seeded, every string marked
+codeable-web doctor --fix                 # verify the wiring is still intact
+codeable-web guardrails --level warn      # install the rules in an existing repo
+```
+
 The generated app passes `typecheck`, `lint`, unit tests, `build` and a Playwright sweep out of the
 box — and `create` verifies that itself before handing the project over.
 
@@ -17,9 +25,9 @@ box — and `create` verifies that itself before handing the project over.
 |---|---|
 | **M0** — golden template | ✅ complete — [`templates/app`](templates/app) is a real runnable app |
 | **M1** — engine + `create` | ✅ working end to end |
-| **M2** — `domain` + `doctor` | next |
-| **M3** — `role`, `component`, `dialog`, `add-locale`, `rename` | planned |
-| **M4** — guardrail package, adoption, v1.0.0 | planned |
+| **M2** — `domain` + `doctor` | ✅ complete |
+| **M3** — `role`, `component`, `dialog`, `add-locale`, `rename` | ✅ complete |
+| **M4** — guardrails, adoption, v1.0.0 | 🚧 `guardrails` done; publish pending |
 
 ## What `create` produces
 

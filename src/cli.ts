@@ -2,6 +2,7 @@ import { Command } from "commander";
 import pc from "picocolors";
 import { registerCreate } from "./commands/create.js";
 import { registerDoctor } from "./commands/doctor.js";
+import { registerGuardrails } from "./commands/guardrails.js";
 import { registerDomain } from "./commands/domain.js";
 import { registerMisc } from "./commands/misc.js";
 import { registerRole } from "./commands/role.js";
@@ -26,6 +27,7 @@ registerDomain(program);
 registerRole(program);
 registerMisc(program);
 registerDoctor(program);
+registerGuardrails(program);
 
 program.parseAsync(process.argv).catch((error: unknown) => {
   const message = error instanceof Error ? error.message : String(error);
