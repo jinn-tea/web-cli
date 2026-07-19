@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { serverEnv } from "@/config/env";
 import { DesignSystemView } from "./design-system-view";
 
 /**
@@ -14,6 +15,6 @@ export const metadata = {
 };
 
 export default function DesignSystemPage() {
-  if (process.env.NODE_ENV === "production") notFound();
+  if (serverEnv.NODE_ENV === "production") notFound();
   return <DesignSystemView />;
 }
