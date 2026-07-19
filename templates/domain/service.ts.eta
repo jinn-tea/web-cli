@@ -30,7 +30,7 @@ export function use<%= it.Name %>(<% if (it.hasRoles) { %>group: RoleGroup | nul
     // Forward `signal` so a superseded search is actually aborted, not merely
     // ignored when it lands.
     queryFn: ({ signal }) =>
-      <%= it.camelName %>Repository.list(<% if (it.hasRoles) { %>group as RoleGroup, <% } %>params, { signal }),
+      <%= it.camelName %>Repository.list(<% if (it.groupedEndpoints) { %>group as RoleGroup, <% } %>params, { signal }),
 <% if (it.hasRoles) { %>    // Gate on the role group: firing with null would request "/null/<%= it.name %>".
     enabled: group !== null,
 <% } %>    // Keep the previous page on screen while the next loads, so paging and
@@ -39,29 +39,29 @@ export function use<%= it.Name %>(<% if (it.hasRoles) { %>group: RoleGroup | nul
   });
 }
 
-export function useCreate<%= it.Entity %>(<% if (it.hasRoles) { %>group: RoleGroup | null<% } %>) {
+export function useCreate<%= it.Entity %>(<% if (it.groupedEndpoints) { %>group: RoleGroup | null<% } %>) {
   return useApiMutation<unknown, Create<%= it.Entity %>Input>({
     mutationFn: (input) =>
-      <%= it.camelName %>Repository.create(<% if (it.hasRoles) { %>group as RoleGroup, <% } %>input),
+      <%= it.camelName %>Repository.create(<% if (it.groupedEndpoints) { %>group as RoleGroup, <% } %>input),
     invalidate: [QUERY_KEYS.<%= it.camelName %>.all],
     successMessage: "<%= it.camelName %>.created",
     reportScope: "<%= it.name %>.create",
   });
 }
 
-export function useUpdate<%= it.Entity %>(<% if (it.hasRoles) { %>group: RoleGroup | null<% } %>) {
+export function useUpdate<%= it.Entity %>(<% if (it.groupedEndpoints) { %>group: RoleGroup | null<% } %>) {
   return useApiMutation<unknown, { id: string; input: Update<%= it.Entity %>Input }>({
     mutationFn: ({ id, input }) =>
-      <%= it.camelName %>Repository.update(<% if (it.hasRoles) { %>group as RoleGroup, <% } %>id, input),
+      <%= it.camelName %>Repository.update(<% if (it.groupedEndpoints) { %>group as RoleGroup, <% } %>id, input),
     invalidate: [QUERY_KEYS.<%= it.camelName %>.all],
     successMessage: "<%= it.camelName %>.updated",
     reportScope: "<%= it.name %>.update",
   });
 }
 
-export function useDelete<%= it.Entity %>(<% if (it.hasRoles) { %>group: RoleGroup | null<% } %>) {
+export function useDelete<%= it.Entity %>(<% if (it.groupedEndpoints) { %>group: RoleGroup | null<% } %>) {
   return useApiMutation<void, string>({
-    mutationFn: (id) => <%= it.camelName %>Repository.remove(<% if (it.hasRoles) { %>group as RoleGroup, <% } %>id),
+    mutationFn: (id) => <%= it.camelName %>Repository.remove(<% if (it.groupedEndpoints) { %>group as RoleGroup, <% } %>id),
     invalidate: [QUERY_KEYS.<%= it.camelName %>.all],
     successMessage: "<%= it.camelName %>.deleted",
     reportScope: "<%= it.name %>.delete",

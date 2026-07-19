@@ -39,7 +39,7 @@ export function <%= it.Name %>Screen() {
   const [deleting, setDeleting] = useState<<%= it.Entity %> | null>(null);
 
   const listQuery = use<%= it.Name %>(<% if (it.hasRoles) { %>group, <% } %>queryParams);
-  const deleteMutation = useDelete<%= it.Entity %>(<% if (it.hasRoles) { %>group<% } %>);
+  const deleteMutation = useDelete<%= it.Entity %>(<% if (it.groupedEndpoints) { %>group<% } %>);
 
   const columns = useMemo(
     () =>

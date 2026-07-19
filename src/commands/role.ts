@@ -42,6 +42,16 @@ async function runAddRole(name: string): Promise<void> {
     addRole(project, name),
   );
 
+  if (result.migration) {
+    ui.note(
+      [
+        ...result.migration.moved.map((entry) => `${pc.cyan("→")} ${entry}`),
+        `${pc.green("✓")} ${result.migration.restored.length} file(s) restored to their role-first shape`,
+      ].join("\n"),
+      "Converted from roleless to role-first",
+    );
+  }
+
   ui.note(
     [
       ...result.wired.map((entry) => `${pc.green("✓")} ${entry}`),
@@ -49,6 +59,10 @@ async function runAddRole(name: string): Promise<void> {
     ].join("\n"),
     `Role "${name}" added`,
   );
+
+  if (result.migration?.notes.length) {
+    ui.note(result.migration.notes.join("\n\n"), "Worth knowing");
+  }
 
   if (result.checklist.length === 0) {
     ui.outro(

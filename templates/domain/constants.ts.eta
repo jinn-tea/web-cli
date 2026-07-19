@@ -1,15 +1,18 @@
-<% if (it.hasRoles) { %>import type { RoleGroup } from "@/constants";
-<% } %>
+<% if (it.groupedEndpoints) { %>import type { RoleGroup } from "@/constants";
 
-/**
+<% } %>/**
  * Every endpoint this domain touches — written down exactly once.
- *
- * Paths are built from a `RoleGroup`, not hardcoded per role: when two roles
- * hit the same resource under different prefixes, ONE parameterized repository
- * serves both. Forking a repository per role is how a codebase ends up with
- * four copies of the same CRUD drifting apart.
- */
-<% if (it.hasRoles) { %>export const <%= it.camelName %>Endpoints = (group: RoleGroup) => ({
+<% if (it.groupedEndpoints) { %> *
+ * Paths are built from a `RoleGroup` because this backend scopes them by group
+ * (`/admin/<%= it.name %>` vs `/lager/<%= it.name %>`). ONE parameterized
+ * repository serves every role; forking one per role is how a codebase ends up
+ * with four copies of the same CRUD drifting apart.
+<% } else { %> *
+ * Plain paths: this backend serves one URL per resource and scopes the rows by
+ * the caller's token. If yours prefixes them per role instead
+ * (`/admin/<%= it.name %>`), regenerate with `--grouped`.
+<% } %> */
+<% if (it.groupedEndpoints) { %>export const <%= it.camelName %>Endpoints = (group: RoleGroup) => ({
   list: `/${group}/<%= it.name %>`,
   detail: (id: string) => `/${group}/<%= it.name %>/${id}`,
   create: `/${group}/<%= it.name %>`,

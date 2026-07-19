@@ -13,6 +13,7 @@ import { formatSource } from "../engine/format.js";
 import { toPascal, toTitle } from "../engine/naming.js";
 import { listDomains, writeConfig, type Project } from "../engine/project.js";
 import { renderString, templatesRoot } from "../engine/template.js";
+import { migrateToRoles, type MigrationResult } from "./migrate-to-roles.js";
 
 /**
  * The `role` generator.
@@ -38,6 +39,8 @@ export interface AddRoleResult {
   created: string[];
   wired: string[];
   checklist: RoleChecklistItem[];
+  /** Set when the project had no roles and was converted to role-first. */
+  migration?: MigrationResult;
 }
 
 /** Where a role's dashboard surface lives. */
@@ -62,6 +65,13 @@ export async function addRole(
   const wired: string[] = [];
 
   const roles = [...config.roles, role];
+
+  // A roleless project needs converting before the role can be added: restore
+  // the role-shaped files, move existing features under common/, repoint their
+  // imports. Without this, `--no-roles` would be a one-way door.
+  const migration =
+    config.roles.length === 0 ? await migrateToRoles(project, role) : undefined;
+
   const tsProject = createProject();
   const note = (changed: boolean, description: string) => {
     if (changed) wired.push(description);
@@ -105,18 +115,26 @@ export async function addRole(
   // 3. The role's folders and its dashboard surface.
   const vars = { roles, role, RoleName: toPascal(role), pascal: toPascal };
 
-  const dashboard = dashboardPath(role);
-  await fs.outputFile(
-    path.join(root, dashboard),
-    await formatSource(
-      await renderPart("role-dashboard.tsx.eta", vars),
+  // A migration has already written this role's dashboard and folders.
+  if (migration) {
+    created.push(`src/features/${role}/`);
+  } else {
+    const dashboard = dashboardPath(role);
+    await fs.outputFile(
       path.join(root, dashboard),
-    ),
-  );
-  created.push(dashboard);
+      await formatSource(
+        await renderPart("role-dashboard.tsx.eta", vars),
+        path.join(root, dashboard),
+      ),
+    );
+    created.push(dashboard);
 
-  await fs.outputFile(path.join(root, `src/features/${role}/_shared/.gitkeep`), "");
-  created.push(`src/features/${role}/_shared/`);
+    await fs.outputFile(
+      path.join(root, `src/features/${role}/_shared/.gitkeep`),
+      "",
+    );
+    created.push(`src/features/${role}/_shared/`);
+  }
 
   // 4. Regenerate the dashboard page rather than patching it — going from one
   //    role to two changes its SHAPE (a direct render becomes `<RoleScreens>`),
@@ -140,6 +158,7 @@ export async function addRole(
     role,
     created,
     wired,
+    migration,
     checklist: await collectChecklist(root),
   };
 }

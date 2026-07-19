@@ -8,7 +8,7 @@ import { FormDialog } from "@/components/form/form-dialog";
 import { SelectField } from "@/components/form/select-field";
 import { TextField } from "@/components/form/text-field";
 import { useTranslations } from "@/i18n";
-<% if (it.hasRoles) { %>import { useRoleGroup } from "@/lib/auth";
+<% if (it.groupedEndpoints) { %>import { useRoleGroup } from "@/lib/auth";
 <% } %>import { GENERIC_STATUSES } from "@/lib/badges";
 import {
   create<%= it.Entity %>Schema,
@@ -37,9 +37,9 @@ export function <%= it.Entity %>FormDialog({
   item?: <%= it.Entity %> | null;
 }) {
   const t = useTranslations();
-<% if (it.hasRoles) { %>  const group = useRoleGroup();
-<% } %>  const createMutation = useCreate<%= it.Entity %>(<% if (it.hasRoles) { %>group<% } %>);
-  const updateMutation = useUpdate<%= it.Entity %>(<% if (it.hasRoles) { %>group<% } %>);
+<% if (it.groupedEndpoints) { %>  const group = useRoleGroup();
+<% } %>  const createMutation = useCreate<%= it.Entity %>(<% if (it.groupedEndpoints) { %>group<% } %>);
+  const updateMutation = useUpdate<%= it.Entity %>(<% if (it.groupedEndpoints) { %>group<% } %>);
 
   const isEdit = Boolean(item);
   const isPending = createMutation.isPending || updateMutation.isPending;

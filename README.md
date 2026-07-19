@@ -83,6 +83,11 @@ jinn-web create blog --no-roles
 jinn-web domain posts            # no --role needed
 ```
 
+Not a one-way door: `jinn-web role admin` later converts the project — it moves
+existing features under `features/common/`, repoints their imports, restores the
+role-shaped files, and reports the handful of call sites the compiler now wants
+updated.
+
 Anything you don't pass as a flag is prompted for; in CI or a non-interactive
 shell every prompt takes its default instead of hanging.
 
@@ -178,8 +183,15 @@ doesn't compile is a bug in the tool, and you should hear it from the tool.
 jinn-web domain <name> --role <role>     # plural, kebab-case: vehicle-types
 ```
 
-Use `--role common` for a domain two or more roles share. `-R` picks the role
-interactively, `--no-page` skips the route, `-f` overwrites existing files.
+Use `--role common` for a domain two or more roles share (omit `--role` entirely
+in a roleless project). `-R` picks the role interactively, `--no-page` skips the
+route, `-f` overwrites existing files.
+
+`--grouped` if your backend prefixes the resource per role (`/admin/orders`).
+That's deliberately separate from whether the project has roles: role-scoped
+**query keys** stop one role's cache serving another's rows and apply whenever
+roles exist, while grouped **endpoints** are a fact about your URLs. Plenty of
+multi-role apps have the first and not the second.
 
 Wires: `APP_ROUTES` · `QUERY_KEYS` · nav item · `src/api.ts` · every locale
 catalog · the App Router page.

@@ -46,6 +46,13 @@ export interface DomainNames {
   isCommon: boolean;
 }
 
+/** `features/admin/orders` with a role, `features/orders` without. */
+export function featurePath(names: Pick<DomainNames, "role" | "name">): string {
+  return names.role
+    ? `features/${names.role}/${names.name}`
+    : `features/${names.name}`;
+}
+
 export function deriveNames(input: string, role: string): DomainNames {
   const name = toKebab(input);
   return {
@@ -142,10 +149,23 @@ export interface GenerateDomainResult {
   skipped: string[];
 }
 
+export interface GenerateDomainOptions {
+  withPage: boolean;
+  /**
+   * The backend prefixes this resource per role (`/admin/orders`).
+   *
+   * Deliberately separate from whether the project HAS roles. Role-scoped query
+   * keys exist to stop one role's cache serving another's rows, and are needed
+   * whenever roles exist. Grouped ENDPOINTS are a fact about the backend's URLs,
+   * and plenty of multi-role apps have neither.
+   */
+  groupedEndpoints: boolean;
+}
+
 export async function generateDomain(
   project: CodeableProject,
   names: DomainNames,
-  options: { withPage: boolean } = { withPage: true },
+  options: GenerateDomainOptions = { withPage: true, groupedEndpoints: false },
 ): Promise<GenerateDomainResult> {
   const { root, config } = project;
   const paths = domainFilePaths(names);
@@ -156,10 +176,8 @@ export async function generateDomain(
   const vars = {
     ...names,
     hasRoles: config.roles.length > 0,
-    // `features/admin/orders` with roles, `features/orders` without.
-    featurePath: names.role
-      ? `features/${names.role}/${names.name}`
-      : `features/${names.name}`,
+    groupedEndpoints: options.groupedEndpoints,
+    featurePath: featurePath(names),
     // The query-key factory needs a concrete fallback group for the disabled
     // case; the project's first role is as good a default as any.
     firstRoleGroup: config.roles[0] ?? "admin",
@@ -221,7 +239,7 @@ export async function generateDomain(
 
   const apiIndex = openFile(tsProject, path.join(root, "src/api.ts"));
   note(
-    addExportStar(apiIndex, `@/features/${names.role}/${names.name}/constants`),
+    addExportStar(apiIndex, `@/${featurePath(names)}/constants`),
     "api.ts endpoint index",
   );
 
@@ -302,7 +320,7 @@ export async function removeDomain(
 
   const apiIndex = openFile(tsProject, path.join(root, "src/api.ts"));
   note(
-    removeExportStar(apiIndex, `@/features/${names.role}/${names.name}/constants`),
+    removeExportStar(apiIndex, `@/${featurePath(names)}/constants`),
     "api.ts endpoint index",
   );
 

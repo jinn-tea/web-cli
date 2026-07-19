@@ -1,4 +1,4 @@
-<% if (it.hasRoles) { %>import type { RoleGroup } from "@/constants";
+<% if (it.groupedEndpoints) { %>import type { RoleGroup } from "@/constants";
 <% } %>import {
   backendClient,
   normalizePagination,
@@ -50,12 +50,12 @@ function buildQuery(params: ListParams): string {
 
 export const <%= it.camelName %>Repository = {
   async list(
-    <% if (it.hasRoles) { %>group: RoleGroup,
+    <% if (it.groupedEndpoints) { %>group: RoleGroup,
     <% } %>params: ListParams = {},
     opts?: RequestOptions,
   ): Promise<Paginated<<%= it.Entity %>>> {
     const raw = await backendClient.get<Raw<%= it.Name %>List>(
-      `${<%= it.camelName %>Endpoints<% if (it.hasRoles) { %>(group)<% } %>.list}${buildQuery(params)}`,
+      `${<%= it.camelName %>Endpoints<% if (it.groupedEndpoints) { %>(group)<% } %>.list}${buildQuery(params)}`,
       opts,
     );
     // snake_case → camelCase happens HERE, at the edge, so no component ever
@@ -67,18 +67,18 @@ export const <%= it.camelName %>Repository = {
   },
 
   detail(
-    <% if (it.hasRoles) { %>group: RoleGroup,
+    <% if (it.groupedEndpoints) { %>group: RoleGroup,
     <% } %>id: string,
     opts?: RequestOptions,
   ): Promise<<%= it.Entity %>> {
     return backendClient.get<<%= it.Entity %>>(
-      <%= it.camelName %>Endpoints<% if (it.hasRoles) { %>(group)<% } %>.detail(id),
+      <%= it.camelName %>Endpoints<% if (it.groupedEndpoints) { %>(group)<% } %>.detail(id),
       opts,
     );
   },
 
   create(
-    <% if (it.hasRoles) { %>group: RoleGroup,
+    <% if (it.groupedEndpoints) { %>group: RoleGroup,
     <% } %>input: Create<%= it.Entity %>Input,
     opts?: RequestOptions,
   ): Promise<<%= it.Entity %>> {
@@ -86,29 +86,29 @@ export const <%= it.camelName %>Repository = {
     // trusts its caller is one refactor away from posting garbage.
     const body = create<%= it.Entity %>Schema.parse(input);
     return backendClient.post<<%= it.Entity %>>(
-      <%= it.camelName %>Endpoints<% if (it.hasRoles) { %>(group)<% } %>.create,
+      <%= it.camelName %>Endpoints<% if (it.groupedEndpoints) { %>(group)<% } %>.create,
       body,
       opts,
     );
   },
 
   update(
-    <% if (it.hasRoles) { %>group: RoleGroup,
+    <% if (it.groupedEndpoints) { %>group: RoleGroup,
     <% } %>id: string,
     input: Update<%= it.Entity %>Input,
     opts?: RequestOptions,
   ): Promise<<%= it.Entity %>> {
     const body = update<%= it.Entity %>Schema.parse(input);
     return backendClient.patch<<%= it.Entity %>>(
-      <%= it.camelName %>Endpoints<% if (it.hasRoles) { %>(group)<% } %>.update(id),
+      <%= it.camelName %>Endpoints<% if (it.groupedEndpoints) { %>(group)<% } %>.update(id),
       body,
       opts,
     );
   },
 
-  remove(<% if (it.hasRoles) { %>group: RoleGroup, <% } %>id: string, opts?: RequestOptions): Promise<void> {
+  remove(<% if (it.groupedEndpoints) { %>group: RoleGroup, <% } %>id: string, opts?: RequestOptions): Promise<void> {
     return backendClient.delete<void>(
-      <%= it.camelName %>Endpoints<% if (it.hasRoles) { %>(group)<% } %>.remove(id),
+      <%= it.camelName %>Endpoints<% if (it.groupedEndpoints) { %>(group)<% } %>.remove(id),
       opts,
     );
   },

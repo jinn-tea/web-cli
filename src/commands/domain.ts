@@ -21,10 +21,20 @@ export function registerDomain(program: Command): void {
     .option("-R, --pick-role", "choose the role interactively")
     .option("--no-page", "skip the App Router page")
     .option("-f, --force", "overwrite existing files without asking")
+    .option(
+      "--grouped",
+      "backend prefixes this resource per role (/admin/orders)",
+    )
     .action(
       async (
         name: string,
-        flags: { role?: string; pickRole?: boolean; page?: boolean; force?: boolean },
+        flags: {
+          role?: string;
+          pickRole?: boolean;
+          page?: boolean;
+          force?: boolean;
+          grouped?: boolean;
+        },
       ) => {
         await runDomain(name, flags);
       },
@@ -75,7 +85,13 @@ async function resolveRole(
 
 async function runDomain(
   input: string,
-  flags: { role?: string; pickRole?: boolean; page?: boolean; force?: boolean },
+  flags: {
+          role?: string;
+          pickRole?: boolean;
+          page?: boolean;
+          force?: boolean;
+          grouped?: boolean;
+        },
 ): Promise<void> {
   const validation = validateName(input, "domain name");
   if (!validation.ok) ui.fail(validation.message ?? "Invalid domain name.");
@@ -105,7 +121,10 @@ async function runDomain(
   }
 
   const result = await ui.step(`Generating ${label}`, () =>
-    generateDomain(project, names, { withPage: flags.page !== false }),
+    generateDomain(project, names, {
+      withPage: flags.page !== false,
+      groupedEndpoints: Boolean(flags.grouped),
+    }),
   );
 
   ui.note(
