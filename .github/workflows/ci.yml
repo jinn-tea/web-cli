@@ -33,7 +33,12 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: npm
           cache-dependency-path: package-lock.json
-      - run: npm ci --no-audit --no-fund
+      # `npm install`, not `npm ci`. Both honour the lockfile, but `ci` demands
+      # it describe the install target EXACTLY — and a lockfile written on
+      # macOS/arm64 doesn't always carry every Linux optional binary, so it
+      # aborts on the runner while working perfectly on the machine that wrote
+      # it. `install` reconciles that instead of failing.
+      - run: npm install --no-audit --no-fund
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
@@ -51,7 +56,12 @@ jobs:
           node-version: "24"
           cache: npm
           cache-dependency-path: templates/app/package-lock.json
-      - run: npm ci --no-audit --no-fund
+      # `npm install`, not `npm ci`. Both honour the lockfile, but `ci` demands
+      # it describe the install target EXACTLY — and a lockfile written on
+      # macOS/arm64 doesn't always carry every Linux optional binary, so it
+      # aborts on the runner while working perfectly on the machine that wrote
+      # it. `install` reconciles that instead of failing.
+      - run: npm install --no-audit --no-fund
 
       # The template is a real app and is held to the same bar it asks of
       # generated projects — if it can't pass, nothing scaffolded from it will.
@@ -96,7 +106,12 @@ jobs:
           node-version: "24"
           cache: npm
           cache-dependency-path: package-lock.json
-      - run: npm ci --no-audit --no-fund
+      # `npm install`, not `npm ci`. Both honour the lockfile, but `ci` demands
+      # it describe the install target EXACTLY — and a lockfile written on
+      # macOS/arm64 doesn't always carry every Linux optional binary, so it
+      # aborts on the runner while working perfectly on the machine that wrote
+      # it. `install` reconciles that instead of failing.
+      - run: npm install --no-audit --no-fund
       - run: node scripts/verify-create.mjs ${{ matrix.scenario }}
 
   roundtrip:
@@ -111,7 +126,12 @@ jobs:
           node-version: "24"
           cache: npm
           cache-dependency-path: package-lock.json
-      - run: npm ci --no-audit --no-fund
+      # `npm install`, not `npm ci`. Both honour the lockfile, but `ci` demands
+      # it describe the install target EXACTLY — and a lockfile written on
+      # macOS/arm64 doesn't always carry every Linux optional binary, so it
+      # aborts on the runner while working perfectly on the machine that wrote
+      # it. `install` reconciles that instead of failing.
+      - run: npm install --no-audit --no-fund
       - run: npm run build
       - run: node scripts/verify-roundtrip.mjs
 
@@ -127,6 +147,11 @@ jobs:
           node-version: "24"
           cache: npm
           cache-dependency-path: package-lock.json
-      - run: npm ci --no-audit --no-fund
+      # `npm install`, not `npm ci`. Both honour the lockfile, but `ci` demands
+      # it describe the install target EXACTLY — and a lockfile written on
+      # macOS/arm64 doesn't always carry every Linux optional binary, so it
+      # aborts on the runner while working perfectly on the machine that wrote
+      # it. `install` reconciles that instead of failing.
+      - run: npm install --no-audit --no-fund
       - run: npm run build
       - run: node scripts/verify-doctor.mjs
