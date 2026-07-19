@@ -1,4 +1,9 @@
-import { LayoutDashboard, Settings, type LucideIcon } from "lucide-react";
+import {
+  LayoutDashboard,
+  Settings,
+  ShoppingCart,
+  type LucideIcon,
+} from "lucide-react";
 import { APP_ROUTES, type Role } from "@/constants";
 import type { MessageKey } from "@/i18n";
 
@@ -28,6 +33,12 @@ export const NAV_ITEMS: readonly NavItem[] = [
     labelKey: "nav.dashboard",
     icon: LayoutDashboard,
     roles: "all",
+  },
+  {
+    href: APP_ROUTES.orders,
+    labelKey: "orders.title",
+    icon: ShoppingCart,
+    roles: ["admin"],
   },
   {
     href: APP_ROUTES.settings,

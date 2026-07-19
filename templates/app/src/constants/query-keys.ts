@@ -21,15 +21,22 @@ export const QUERY_KEYS = {
     all: ["session"] as const,
     currentUser: () => [...QUERY_KEYS.session.all, "current-user"] as const,
   },
+  orders: resourceKeys("orders"),
   // codeable-web:query-keys — the `domain` generator appends new factories here.
 } as const;
 
-/** Params any paginated list accepts; extend per domain as needed. */
+/**
+ * Params any paginated list accepts.
+ *
+ * No index signature on purpose: a domain that needs extra filters declares its
+ * own `interface OrderListParams extends ListParams { status?: string }` and
+ * passes it as a variable, which is assignable without weakening this type for
+ * everyone else.
+ */
 export interface ListParams {
   page?: number;
   q?: string;
   sort?: string;
-  [key: string]: unknown;
 }
 
 /**

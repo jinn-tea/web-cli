@@ -150,6 +150,35 @@ const en = {
     danger: "Danger zone",
     signOutHint: "Sign out of this device.",
   },
+  orders: {
+    title: "Orders",
+    subtitle: "Every order across the workspace.",
+    create: "New order",
+    createTitle: "New order",
+    editTitle: "Edit order",
+    formHint: "Orders sync to the backend as soon as you save.",
+    searchPlaceholder: "Search by reference or customer",
+    empty: "No orders yet",
+    emptyHint: "Orders appear here as soon as the first one is placed.",
+    deleteTitle: "Delete this order?",
+    created: "Order created",
+    updated: "Order updated",
+    deleted: "Order deleted",
+    columns: {
+      reference: "Reference",
+      customer: "Customer",
+      status: "Status",
+      total: "Total",
+      created: "Created",
+    },
+    status: {
+      draft: "Draft",
+      pending: "Pending",
+      active: "Active",
+      completed: "Completed",
+      cancelled: "Cancelled",
+    },
+  },
   // codeable-web:i18n — the `domain` generator appends new namespaces here.
 } as const;
 

@@ -13,6 +13,7 @@ export const AUTH_ROUTES = {
 
 export const APP_ROUTES = {
   dashboard: "/dashboard",
+  orders: "/orders",
   settings: "/settings",
   // codeable-web:routes — the `domain` generator appends new routes here.
 } as const;
