@@ -30,9 +30,6 @@ generates is reachable immediately, not just present on disk.
 It's the web counterpart to the Codeable Flutter CLI, built on the same idea:
 make the right architecture the path of least resistance from the first commit.
 
-> **Personal project.** The conventions it generates are Codeable's; the tool is
-> mine and isn't an official Codeable product.
-
 ## Table of contents
 
 - [Prerequisites](#prerequisites)
