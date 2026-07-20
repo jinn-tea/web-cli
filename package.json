@@ -1,6 +1,6 @@
 {
   "name": "jinn-web",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Scaffold and grow production-ready Next.js apps with the Codeable web architecture.",
   "directories": {
     "doc": "docs"

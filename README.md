@@ -50,17 +50,15 @@ make the right architecture the path of least resistance from the first commit.
 
 ## Installation
 
-Not on npm yet. Install from the repository:
-
 ```bash
-npm install -g github:jinn-tea/web-cli
+npm install -g jinn-web
 jinn-web --version
 ```
 
-Or run a single command without installing:
+Or run it without installing:
 
 ```bash
-npx github:jinn-tea/web-cli create my-app
+npx jinn-web create my-app
 ```
 
 ## Quick start
