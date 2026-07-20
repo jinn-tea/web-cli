@@ -247,6 +247,16 @@ Every generated domain (doc 05) mirrors this file naming exactly (AR-008).
 
 ## 6. Roles wiring (rendered from `--roles`)
 
+> **Roleless projects (`--no-roles`).** Everything role-shaped is simply absent:
+> no `constants/roles.ts`, no `RoleScreens`, no `RequireRole`, no `roles` field
+> on nav items, and features sit flat at `features/<domain>/`. Twelve template
+> files carry `jinn-web:role-only` / `jinn-web:roleless` marker regions
+> (`src/engine/role-blocks.ts`) resolved at generation time — one transform
+> rather than a second copy of each file or a per-file subtractive regex. The
+> `roleless` blocks are commented out in the template so it stays runnable and
+> sweepable. `jinn-web role <name>` later migrates a roleless project to
+> role-first; see doc 05 §4.
+
 - `constants/roles.ts.eta` renders: `ROLES` as const tuple from the answer, `Role` union,
   `ROLE_LABEL_KEYS: Record<Role, MessageKey>`, `DEFAULT_AUTHED_ROUTE`, and an exhaustiveness
   guard (`const _check: Record<Role, true> = …` pattern) so `jinn-web role` additions force

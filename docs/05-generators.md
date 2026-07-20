@@ -92,6 +92,21 @@ changed/skipped), delete the domain dir and the `(app)` page, remove seeded i18n
 `tsc --noEmit`. Round-trip (`domain` → `remove-domain`) must restore every touched file
 **byte-for-byte** (tested — doc 06 §4).
 
+## 3b. Endpoint grouping is NOT roles
+
+`domain --grouped` decides whether the backend prefixes a resource per role
+(`/admin/orders`). It is deliberately independent of whether the project has
+roles at all:
+
+- **Role-scoped query keys** stop one role's cache serving another's rows, and
+  apply whenever roles exist.
+- **Grouped endpoints** are a fact about the backend's URLs. Plenty of multi-role
+  apps have one set of endpoints and scope rows by the caller's token.
+
+Conflating them (the original design) made every generated repository carry a
+`RoleGroup` parameter it didn't need, and made migration far harder than it
+needed to be.
+
 ## 4. `role <name>` / `remove-role <name>` (no Flutter equivalent — our differentiator)
 
 `role <name>`:
@@ -113,6 +128,18 @@ Generate its first domain:  jinn-web domain <name> --role lager
 That reframing — *compiler errors as the todo list* — is the entire point of the tuple+guard
 architecture. `remove-role` reverses 1–4, refuses if `features/<name>/` still contains domains
 (tells the user to `remove-domain` or migrate them first).
+
+**On a ROLELESS project, `role` migrates first** (`src/generators/migrate-to-roles.ts`):
+restore the twelve role-shaped files, create `roles.ts`, move existing features
+under `common/` and repoint their imports, then add the new role. It runs inside
+a whole-tree transaction, because a half-moved tree is worse than not starting.
+
+It deliberately does NOT rewrite service hooks to pass a role group to their
+query keys — that signature changes, so the compiler flags every call site, and
+`role` already reports compiler errors as a checklist. `nav-config.ts` and
+`query-keys.ts` get targeted edits rather than template restoration, because both
+accumulate one entry per generated domain and restoring them would delete the
+user's work.
 
 ## 5. `component <name>` and `dialog <name>`
 

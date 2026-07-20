@@ -1,5 +1,6 @@
 import { execa } from "execa";
 import fs from "fs-extra";
+import os from "node:os";
 import path from "node:path";
 import {
   addArrayElement,
@@ -56,7 +57,71 @@ async function renderPart(file: string, vars: object): Promise<string> {
   return renderString(source, vars);
 }
 
+/**
+ * Run a whole-tree operation with rollback.
+ *
+ * Migration moves folders, rewrites imports across every file, and restores a
+ * dozen others. A failure part-way through leaves folders moved and imports
+ * half-repointed — a state that's hard to reason about and worse than not
+ * having started. Snapshotting `src/` is blunt, but it's a few hundred KB of
+ * text and it makes the operation genuinely atomic.
+ *
+ * Individual file writes elsewhere use the FileOp planner; this one is a
+ * transaction because its unit of correctness is the whole tree.
+ */
+async function withTreeRollback<T>(
+  root: string,
+  run: () => Promise<T>,
+): Promise<T> {
+  const backup = await fs.mkdtemp(path.join(os.tmpdir(), "jinn-web-rollback-"));
+  const backupSrc = path.join(backup, "src");
+  const srcDir = path.join(root, "src");
+  await fs.copy(srcDir, backupSrc);
+
+  try {
+    const result = await run();
+    await fs.remove(backup);
+    return result;
+  } catch (error) {
+    // Restore by RENAMING the broken tree aside first, then moving the backup
+    // into place. Deleting `src` up front is what a first attempt did, and when
+    // the delete then partially failed the move had nowhere to go — leaving no
+    // tree at all. Renaming needs no permissions inside the tree, and nothing
+    // is destroyed until the good copy is back.
+    const aside = `${srcDir}.failed-${Date.now()}`;
+    try {
+      await fs.move(srcDir, aside);
+      await fs.move(backupSrc, srcDir);
+      await fs.remove(aside);
+      await fs.remove(backup);
+    } catch (rollbackError) {
+      // NEVER swallow this. A failed rollback means their code is somewhere
+      // other than where they left it, and they need to know exactly where.
+      throw new Error(
+        `Migration failed, and rolling back also failed.\n` +
+          `  Original error: ${error instanceof Error ? error.message : String(error)}\n` +
+          `  Rollback error: ${rollbackError instanceof Error ? rollbackError.message : String(rollbackError)}\n` +
+          `  A copy of your src/ before the migration is at: ${backupSrc}\n` +
+          `  Nothing there has been deleted — restore it by hand.`,
+      );
+    }
+    throw error;
+  }
+}
+
 export async function addRole(
+  project: Project,
+  role: string,
+): Promise<AddRoleResult> {
+  // Converting a roleless project rewrites the whole tree, so it runs as a
+  // transaction. Adding a role to a project that already has them is a handful
+  // of additive edits and doesn't need one.
+  return project.config.roles.length === 0
+    ? withTreeRollback(project.root, () => addRoleInner(project, role))
+    : addRoleInner(project, role);
+}
+
+async function addRoleInner(
   project: Project,
   role: string,
 ): Promise<AddRoleResult> {

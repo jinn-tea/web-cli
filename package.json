@@ -1,6 +1,6 @@
 {
   "name": "jinn-web",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Scaffold and grow production-ready Next.js apps with the Codeable web architecture.",
   "directories": {
     "doc": "docs"
@@ -12,9 +12,10 @@
     "typecheck": "tsc --noEmit",
     "verify": "npm run typecheck && npm run test",
     "verify:create": "node scripts/verify-create.mjs",
-    "verify:all": "npm run verify && npm run verify:create && npm run verify:roundtrip && npm run verify:doctor",
+    "verify:all": "npm run verify && npm run verify:create && npm run verify:roundtrip && npm run verify:doctor && npm run verify:migration",
     "verify:roundtrip": "node scripts/verify-roundtrip.mjs",
-    "verify:doctor": "node scripts/verify-doctor.mjs"
+    "verify:doctor": "node scripts/verify-doctor.mjs",
+    "verify:migration": "node scripts/verify-migration.mjs"
   },
   "repository": {
     "type": "git",

@@ -155,3 +155,19 @@ jobs:
       - run: npm install --no-audit --no-fund
       - run: npm run build
       - run: node scripts/verify-doctor.mjs
+
+  migration:
+    name: roleless → role-first migration
+    runs-on: ubuntu-latest
+    # The most intricate path in the CLI, and the one where a failure would
+    # leave someone's tree half-moved. Covers the happy path AND the rollback.
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm install --no-audit --no-fund
+      - run: npm run build
+      - run: node scripts/verify-migration.mjs

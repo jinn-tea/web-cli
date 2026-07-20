@@ -97,6 +97,9 @@ Doc 05 §2–3 + doc 06 §1–2 (checks 1–5 first: routes, query-keys, nav, ap
 level as the real-world pilot; skills cross-references updated; docs/README polished; tag v1.0.0.
 *Exit:* doc 01 §9 definition-of-done, all four points.
 
+**Shipped in 1.1:** roleless projects (`--no-roles`), roleless→role-first
+migration, endpoint grouping decoupled from roles (`domain --grouped`).
+
 **v1.x roadmap (post-1.0, in rough priority):** `doctor --json` · Claude Code plugin ·
 `migrate` command · optional topology-B (internal route handlers) template variant · dark-mode
 token variant · `jinn-web upgrade-deps` (template-verified dependency bumps) · telemetry-free

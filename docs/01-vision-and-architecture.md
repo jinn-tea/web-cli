@@ -38,6 +38,10 @@ jinn-web doctor  ──►  proof it stayed that way
 - **Scaffolds:** Next.js 16 App Router · React 19 · TypeScript strict · Tailwind v4 · shadcn/ui ·
   TanStack Query v5 · Zustand v5 · Zod v4 · typed i18n (no lib, the lucas_web pattern) ·
   Playwright (sweep harness) · Vitest
+- **Roles are optional.** `create --no-roles` produces a genuinely roleless app —
+  no `Role` type, no guards, features flat under `features/<domain>/`. Roles can be
+  added later; `role <name>` migrates the project rather than making the choice
+  permanent. See doc 02 §6.
 - **Targets:** the app is a *client of an external backend*. Default auth is **BFF-lite**
   (httpOnly refresh cookie via a thin `/api/session` route handler, access token in memory —
   works against existing bearer backends unchanged and enables middleware gating + server
@@ -51,7 +55,7 @@ specified exactly in docs 04–06.
 
 | Flutter CLI (`codeable_cli`)   | Web CLI (`jinn-web`)          | Notes |
 |---|---|---|
-| `create` (`-n -o -a -d --output --roles`) | `create` (`-n -a -d --output --roles --locales --brand --api-url --pm`) | No `--org` (no bundle ids on web); adds locales, brand hex, backend URL, package manager. |
+| `create` (`-n -o -a -d --output --roles`) | `create` (`-n -a -d --output --roles --no-roles --locales --brand --api-url --pm`) | No `--org` (no bundle ids on web); adds locales, brand hex, backend URL, package manager. |
 | `feature <name> --role/--pick-role` | `domain <name> --role/--pick-role` | "Domain" matches web vocabulary (`features/<role>/<domain>`). |
 | `remove-feature`               | `remove-domain`                   | Full reverse incl. unwiring. |
 | `bottom-sheet <name> -f -t`    | `dialog <name> --domain -t`       | Types: `confirm \| form \| custom` (web has dialogs/sheets via shadcn). |

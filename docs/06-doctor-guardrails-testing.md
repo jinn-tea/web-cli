@@ -110,6 +110,7 @@ jobs:
   quality:   lint + typecheck + unit/golden tests            (node 20, 22)
   template:  create fixture matrix → compile-the-output suite (cache pnpm store + next cache)
   doctor:    seeded-breakage matrix
+  migration: roleless → role-first, happy path AND rollback
   release:   on tag — build, npm publish --provenance (doc 07)
 ```
 
