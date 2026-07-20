@@ -10,7 +10,7 @@ import type { TranslateFn } from "@/i18n";
 import { GENERIC_STATUS_TONE } from "@/lib/badges";
 import { formatCurrency } from "@/lib/format";
 import { formatDate } from "@/lib/datetime";
-import type { Order } from "@/features/admin/orders/types";
+import type { OrderListItem } from "@/features/admin/orders/types";
 
 /**
  * Column definitions, built by a factory rather than declared inline in the
@@ -30,9 +30,9 @@ export function buildOrderColumns({
   t: TranslateFn;
   sort: string;
   onSortChange: (sort: string) => void;
-  onEdit: (order: Order) => void;
-  onDelete: (order: Order) => void;
-}): ColumnDef<Order, unknown>[] {
+  onEdit: (order: OrderListItem) => void;
+  onDelete: (order: OrderListItem) => void;
+}): ColumnDef<OrderListItem, unknown>[] {
   return [
     {
       accessorKey: "reference",

@@ -18,7 +18,7 @@ shadcn/ui, typed i18n**. Read this before adding code so the structure stays con
 | Styling | Tailwind CSS v4, tokens in `src/app/globals.css` |
 | UI components | shadcn/ui (Radix, Nova preset) — `src/components/ui` |
 | Icons | lucide-react |
-| Validation | Zod — `src/validations` + `features/*/validations` |
+| Validation | Zod — `features/*/models` (responses) + `features/*/validations` (forms) |
 | Server state | TanStack React Query v5 |
 | Client state | Zustand (session, locale) + URL state via nuqs |
 | Tables | TanStack Table via `components/shared/data-table` |
@@ -32,11 +32,15 @@ shadcn/ui, typed i18n**. Read this before adding code so the structure stays con
 2. **Role-first, then domain.** `src/features/<role>/<domain>/`. A domain's default home is its
    role's folder; it moves to `common/` only when a **second role genuinely shares it**. Code shared
    by two domains within one role goes in `features/<role>/_shared/`. Cross-cutting code lives in
-   `lib/`, `components/`, `constants/`, `types/`, `validations/`, `config/`, `hooks/`, `i18n/`.
+   `lib/`, `components/`, `constants/`, `validations/`, `config/`, `hooks/`, `i18n/`.
 3. **No sibling imports.** Role folders may import `common/`; `common/` never imports a role folder;
    two domains never import each other. Shared layers never import `features/`.
-4. **Zod is the source of truth** for external/user data. Forms and repositories parse with the same
-   schema; types are `z.infer`. Validation messages are **i18n keys**.
+4. **Zod is the source of truth** for external/user data, in **both** directions. A repository parses
+   what it sends (`createOrderSchema.parse(input)`) *and* what it receives (`{ parse: orderSchema.parse }`).
+   Types are always `z.infer` — never a hand-written interface beside a schema, which only drifts.
+   Validation messages are **i18n keys**.
+   A bare `backendClient.get<Order>(…)` is a claim TypeScript erases, so a renamed backend field
+   becomes `undefined` in a component and crashes somewhere unrelated. `jinn-web doctor` flags it.
 5. **Server data lives in React Query, never Zustand.** Zustand holds session identity and locale.
 6. **Never hardcode** a display string (`t(...)`), a color (tokens), a route (`ROUTES`), a role
    (`constants/roles`), an endpoint (feature `constants.ts`), or a query key (`QUERY_KEYS`).
@@ -51,7 +55,9 @@ src/
 │   ├── (app)/                # authed shell: RequireAuth + AppShell
 │   ├── api/session/          # THE only route handlers — BFF auth lifecycle
 │   ├── layout.tsx · page.tsx · loading/error/not-found · globals.css
-├── features/<role>/<domain>/ # components · api · services · validations · types · constants.ts
+├── features/<role>/<domain>/ # components · api · services · models · validations · types · constants.ts
+│                             #   models/    = wire shapes  (what the backend RETURNS)
+│                             #   validations/ = form input (what you SEND)
 ├── components/
 │   ├── ui/                   # shadcn primitives (generated — don't hand-edit)
 │   ├── shared/               # StatusBadge, TruncatedText, EmptyState, ErrorState,
@@ -75,12 +81,25 @@ src/
 
 ```
 component → features/*/services (React Query hook)
-          → features/*/api/*.repository.ts (Zod-validated, typed)
-          → lib/http/backendClient  (envelope unwrap · bearer · refresh-on-401 · abort)
+          → features/*/api/*.repository.ts (parses BOTH directions)
+          → lib/http/backendClient  (envelope unwrap · bearer · refresh-on-401 · abort · parse)
           → external backend
 ```
 
 Never skip a layer, and never call `fetch` outside `lib/http` — ESLint enforces both.
+
+### Models
+
+Each domain owns `models/<entity>.model.ts`: a Zod schema plus the type inferred from it. Two
+schemas, on purpose — the full model, and a narrower `…ListItemSchema` derived with `.pick()`.
+
+**Model the response, not the entity.** If one shared shape had to satisfy every endpoint, adding a
+field to a detail screen would force the backend to enrich every list endpoint returning that
+entity. Narrow list rows so a frontend model never dictates backend responses.
+
+Unknown keys are stripped, so the backend **adding** fields never breaks the client — only a field
+you rely on changing shape does. When the backend is mid-rollout, reach for `.optional()`,
+`.nullable()` or `.catch(fallback)` rather than dropping the parse.
 
 ## Auth (BFF model) — read this before touching sessions
 
@@ -120,6 +139,7 @@ what makes server-side prefetching possible. A localStorage bearer token forfeit
 | A domain | `jinn-web domain <name> --role <role>` (emits + wires routes, keys, nav, i18n) |
 | A role | `jinn-web role <name>`, then fix every compile error it surfaces |
 | A page | `src/app/(app)/<name>/page.tsx` — thin; dispatch with `RoleScreens` if role-varying |
+| A backend field | the schema in `features/*/models/*.model.ts` — the type follows via `z.infer` |
 | A shared component | 2+ domains in one role → `features/<role>/_shared/`; across roles → `components/shared/` |
 | A shadcn primitive | `npx shadcn@latest add <name>` |
 | An env var | the Zod schema in `config/env.ts` (browser vars need `NEXT_PUBLIC_`) |
@@ -149,7 +169,9 @@ pathologically long string in a browser.
 ## UX bar
 
 Every async surface ships **loading / empty / error / loaded**. Loading is layout-matching
-**skeletons**, never a screen spinner. Errors show `ApiError.message` and offer retry. Destructive
+**skeletons**, never a screen spinner. Errors show `ApiError.message` and offer retry. A
+`ParseError` deliberately shows the generic message instead — a field path is a developer's
+problem, and it's already in the log with the endpoint that produced it. Destructive
 actions confirm via `ConfirmDialog`. Submit buttons disable while pending. `DataTable` gives you all
 of this for lists — use it rather than hand-rolling a table.
 

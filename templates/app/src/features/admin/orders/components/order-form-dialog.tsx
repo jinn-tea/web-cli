@@ -19,7 +19,7 @@ import {
   useCreateOrder,
   useUpdateOrder,
 } from "@/features/admin/orders/services/use-orders";
-import type { Order } from "@/features/admin/orders/types";
+import type { OrderListItem } from "@/features/admin/orders/types";
 
 /**
  * Create/edit dialog. One component serves both modes — a separate "edit"
@@ -34,7 +34,7 @@ export function OrderFormDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
   /** Present = edit mode. */
-  order?: Order | null;
+  order?: OrderListItem | null;
 }) {
   const t = useTranslations();
   const group = useRoleGroup();

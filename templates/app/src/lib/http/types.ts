@@ -11,6 +11,8 @@
  * are the only two places that need to change.
  */
 
+import { z } from "zod";
+
 export interface ApiErrorPayload {
   timestamp: string;
   message: string;
@@ -46,6 +48,35 @@ export interface Pagination {
 export interface Paginated<T> {
   items: T[];
   pagination: Pagination;
+}
+
+/**
+ * Runtime shape of the pagination block.
+ *
+ * Every field is optional because `normalizePagination` already defaults a
+ * missing one — the schema's job is to reject a field that is *present but the
+ * wrong type* (`total_pages: "3"`), which is what silently produces NaN.
+ */
+export const rawPaginationSchema = z
+  .object({
+    current_page: z.number(),
+    total_pages: z.number(),
+    total_items: z.number(),
+  })
+  .partial();
+
+/**
+ * Build the response schema for a paginated list: `paginatedResponseSchema(orderListItemSchema)`.
+ *
+ * Pass the LIST-ROW schema, not the detail one. A table needs a handful of
+ * columns; requiring every field a detail view shows is how a frontend model
+ * ends up dictating that the backend enrich every list endpoint.
+ */
+export function paginatedResponseSchema<T extends z.ZodType>(item: T) {
+  return z.object({
+    items: z.array(item).default([]),
+    pagination: rawPaginationSchema.default({}),
+  });
 }
 
 /**

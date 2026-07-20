@@ -320,10 +320,123 @@ const i18nCheck: DoctorCheck = {
   },
 };
 
+/**
+ * Blank out comments and string bodies, preserving every offset and newline.
+ *
+ * Necessary because the repository's own doc comment explains the rule by
+ * quoting `backendClient.get<Order>(…)` — scanning raw source reports the
+ * documentation as a violation. Offsets are preserved (characters become
+ * spaces) so reported line numbers still point at real code.
+ */
+function blankNonCode(source: string): string {
+  const out = source.split("");
+  let mode: "code" | "line" | "block" | "single" | "double" | "template" =
+    "code";
+
+  for (let i = 0; i < source.length; i += 1) {
+    const char = source[i]!;
+    const next = source[i + 1];
+    const blank = () => {
+      if (char !== "\n") out[i] = " ";
+    };
+
+    if (mode === "code") {
+      if (char === "/" && next === "/") mode = "line";
+      else if (char === "/" && next === "*") mode = "block";
+      else if (char === "'") mode = "single";
+      else if (char === '"') mode = "double";
+      else if (char === "`") mode = "template";
+      else continue;
+      blank();
+      continue;
+    }
+
+    // Inside a non-code region: blank it, then look for the terminator.
+    blank();
+    if (mode === "line" && char === "\n") mode = "code";
+    else if (mode === "block" && char === "/" && source[i - 1] === "*")
+      mode = "code";
+    else if (mode === "single" && char === "'" && source[i - 1] !== "\\")
+      mode = "code";
+    else if (mode === "double" && char === '"' && source[i - 1] !== "\\")
+      mode = "code";
+    else if (mode === "template" && char === "`" && source[i - 1] !== "\\")
+      mode = "code";
+  }
+
+  return out.join("");
+}
+
+/**
+ * Read the argument list of a call starting at `open` (the index of its `(`),
+ * respecting nesting so a call containing an object or a template literal is
+ * captured whole rather than cut at the first inner `)`.
+ */
+function callArguments(source: string, open: number): string {
+  let depth = 0;
+  for (let i = open; i < source.length; i += 1) {
+    const char = source[i];
+    if (char === "(") depth += 1;
+    else if (char === ")") {
+      depth -= 1;
+      if (depth === 0) return source.slice(open + 1, i);
+    }
+  }
+  return source.slice(open + 1);
+}
+
+/**
+ * Repositories must validate what they RECEIVE, not just what they send.
+ *
+ * `backendClient.get<Order>(…)` is a claim TypeScript erases — nothing checks
+ * that the response is an Order. When the backend renames a field it becomes
+ * `undefined` inside a component, and the crash surfaces somewhere with no
+ * connection to the endpoint that caused it. Passing `parse` moves that failure
+ * to the boundary, where the message can name the endpoint and the field.
+ *
+ * `delete` is exempt: it answers with an empty envelope, so there's no shape to
+ * check.
+ */
+const responseParsingCheck: DoctorCheck = {
+  id: "response-parsing",
+  title: "Response validation",
+  async run({ read, walk }) {
+    const issues: Issue[] = [];
+    const repositories = await walk("src/features", (file) =>
+      /\/api\/[^/]+\.repository\.ts$/.test(file),
+    );
+
+    for (const file of repositories) {
+      const raw = await read(file);
+      if (!raw) continue;
+      const source = blankNonCode(raw);
+
+      // `delete` and `getBlob` return nothing parseable.
+      const calls = source.matchAll(
+        /backendClient\.(get|post|put|patch)\s*(?:<[^>]*>)?\s*\(/g,
+      );
+      for (const call of calls) {
+        const open = call.index + call[0].length - 1;
+        if (callArguments(source, open).includes("parse:")) continue;
+
+        issues.push({
+          file,
+          line: source.slice(0, call.index).split("\n").length,
+          message: `backendClient.${call[1]} doesn't validate its response — pass \`{ parse: <schema>.parse }\` so a shape change fails here instead of inside a component.`,
+          fixable: false,
+        });
+      }
+    }
+
+    return issues;
+  },
+};
+
 export const CHECKS: DoctorCheck[] = [
   routesCheck,
   queryKeysCheck,
   navCheck,
   apiIndexCheck,
+  responseParsingCheck,
   i18nCheck,
 ];

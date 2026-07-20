@@ -22,6 +22,7 @@ export {
   initAuthTransport,
 } from "./session";
 export { AUTH_ENDPOINTS, SESSION_ROUTES } from "./endpoints";
+export { authUserSchema, backendAuthPayloadSchema } from "./types";
 export type {
   AuthUser,
   SessionPayload,

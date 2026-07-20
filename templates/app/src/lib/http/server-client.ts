@@ -1,7 +1,7 @@
 import "server-only";
 
 import { backendApiUrl } from "@/config/env";
-import { ApiError, NetworkError } from "./errors";
+import { ApiError, NetworkError, toParseError } from "./errors";
 import type { ApiEnvelope } from "./types";
 
 /**
@@ -15,7 +15,7 @@ import type { ApiEnvelope } from "./types";
  * error rather than a runtime surprise.
  */
 
-export interface ServerRequestOptions {
+export interface ServerRequestOptions<T = unknown> {
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   body?: unknown;
   /** Bearer token for authed calls. */
@@ -23,13 +23,26 @@ export interface ServerRequestOptions {
   /** Forwarded so the backend localizes its error messages. */
   acceptLanguage?: string;
   signal?: AbortSignal;
+  /**
+   * Validate the response — see `RequestOptions.parse` on the browser client.
+   * Kept in step deliberately: a Route Handler that skipped validation would be
+   * an unchecked way into the same data the browser client guards.
+   */
+  parse?: (data: unknown) => T;
 }
 
 export async function serverRequest<T>(
   path: string,
-  options: ServerRequestOptions = {},
+  options: ServerRequestOptions<T> = {},
 ): Promise<T> {
-  const { method = "GET", body, accessToken, acceptLanguage, signal } = options;
+  const {
+    method = "GET",
+    body,
+    accessToken,
+    acceptLanguage,
+    signal,
+    parse,
+  } = options;
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -61,6 +74,14 @@ export async function serverRequest<T>(
       envelope?.error?.message ?? res.statusText ?? "Request failed",
       envelope?.error?.timestamp,
     );
+  }
+
+  if (parse) {
+    try {
+      return parse(envelope?.data);
+    } catch (error) {
+      throw toParseError(`${method} ${path}`, error);
+    }
   }
 
   return envelope?.data as T;

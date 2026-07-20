@@ -39,12 +39,16 @@ jinn-web domain <name> [-r --role <role> | -R --pick-role] [--no-page] [--starte
 ```
 features/<role>/<name>/
 ├── api/<name>.repository.ts      # list/get/create/update/remove on backendClient; Zod-parsed
-│                                 #   input; list forwards { signal }; paginated via normalizePagination
+│                                 #   in BOTH directions ({ parse: <entity>Schema.parse } on every
+│                                 #   response); list forwards { signal }; paginated via
+│                                 #   normalizePagination
+├── models/<entity>.model.ts      # the WIRE shape: <entity>Schema + <entity>ListItemSchema
+│                                 #   (a .pick() of it), types via z.infer
 ├── services/use-<name>.ts        # useList (keepPreviousData, QUERY_KEYS factory, signal, params
 │                                 #   from useTableParams), useCreate/useUpdate/useDelete via
 │                                 #   createMutationHelpers (invalidate + ApiError toast — lib/mutations)
-├── validations/<name>.schema.ts  # createSchema/updateSchema; messages are i18n keys
-├── types/index.ts                # <Name> entity + Create<Name>Input (z.infer)
+├── validations/<name>.schema.ts  # FORM input: createSchema/updateSchema; messages are i18n keys
+├── types/index.ts                # re-exports the model's inferred types (stable import path)
 ├── constants.ts                  # <name>Endpoints — group-parameterized factory shape
 └── components/
     ├── <name>-screen.tsx         # ~30 lines: PageHeader + SearchInput + <DataTable> (URL-synced

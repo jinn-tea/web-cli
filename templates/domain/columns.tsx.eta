@@ -9,7 +9,7 @@ import { TruncatedText } from "@/components/shared/truncated-text";
 import type { TranslateFn } from "@/i18n";
 import { GENERIC_STATUS_TONE } from "@/lib/badges";
 import { formatDate } from "@/lib/datetime";
-import type { <%= it.Entity %> } from "@/<%= it.featurePath %>/types";
+import type { <%= it.Entity %>ListItem } from "@/<%= it.featurePath %>/types";
 
 /**
  * Column definitions, built by a factory rather than declared inline in the
@@ -29,9 +29,9 @@ export function build<%= it.Name %>Columns({
   t: TranslateFn;
   sort: string;
   onSortChange: (sort: string) => void;
-  onEdit: (item: <%= it.Entity %>) => void;
-  onDelete: (item: <%= it.Entity %>) => void;
-}): ColumnDef<<%= it.Entity %>, unknown>[] {
+  onEdit: (item: <%= it.Entity %>ListItem) => void;
+  onDelete: (item: <%= it.Entity %>ListItem) => void;
+}): ColumnDef<<%= it.Entity %>ListItem, unknown>[] {
   return [
     {
       accessorKey: "name",

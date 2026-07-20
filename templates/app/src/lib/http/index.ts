@@ -8,13 +8,18 @@ export {
 export {
   ApiError,
   NetworkError,
+  ParseError,
   isApiError,
   isNetworkError,
   isAbortError,
+  isParseError,
+  toParseError,
 } from "./errors";
 export { tokenStore } from "./token-store";
 export {
   normalizePagination,
+  paginatedResponseSchema,
+  rawPaginationSchema,
   type ApiEnvelope,
   type MessageResult,
   type Pagination,

@@ -18,7 +18,7 @@ import {
   useDeleteOrder,
   useOrders,
 } from "@/features/admin/orders/services/use-orders";
-import type { Order } from "@/features/admin/orders/types";
+import type { OrderListItem } from "@/features/admin/orders/types";
 
 /**
  * The reference list screen — what `jinn-web domain` generates.
@@ -33,9 +33,9 @@ export function OrdersScreen() {
   const group = useRoleGroup();
   const { params, queryParams, setPage, setQuery, setSort } = useTableParams();
 
-  const [editing, setEditing] = useState<Order | null>(null);
+  const [editing, setEditing] = useState<OrderListItem | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [deleting, setDeleting] = useState<Order | null>(null);
+  const [deleting, setDeleting] = useState<OrderListItem | null>(null);
 
   const ordersQuery = useOrders(group, queryParams);
   const deleteMutation = useDeleteOrder(group);

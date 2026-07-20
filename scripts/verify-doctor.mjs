@@ -77,6 +77,18 @@ const SCENARIOS = [
     },
   },
   {
+    // The check has to read past the repository's own doc comment, which
+    // quotes `backendClient.get<Order>(…)` while explaining the rule — an
+    // earlier version reported that documentation as a violation.
+    name: "a repository stops validating its response",
+    expect: "response-parsing",
+    async break_(dir) {
+      const file = path.join(dir, "src/features/admin/orders/api/orders.repository.ts");
+      const source = await fs.readFile(file, "utf8");
+      await fs.writeFile(file, source.replace(/\n\s*parse: orderSchema\.parse,/, ""));
+    },
+  },
+  {
     name: "a translation key is missing",
     expect: "i18n",
     async break_(dir) {

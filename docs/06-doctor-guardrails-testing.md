@@ -26,7 +26,7 @@ interface Issue { file: string; line?: number; message: string; fixable: boolean
 `jinn-web doctor` prints grouped ✓/✗ per check (exit 2 if any issue);
 `doctor --fix` applies every `fixable` issue through the plan engine and re-runs.
 
-## 2. The 9 checks (exact semantics)
+## 2. The 10 checks (exact semantics)
 
 | # | id | What it verifies | Fixable? |
 |---|---|---|---|
@@ -39,6 +39,7 @@ interface Issue { file: string; line?: number; message: string; fixable: boolean
 | 7 | `roles` | `jinn-web.config.json` roles ⊆ `src/features/*` dirs and vice versa; every role present in `ROLE_LABEL_KEYS` and the i18n `roles.*` namespace. | sync config ✓ |
 | 8 | `naming` | Every domain follows AR-008 (`use-<domain>.ts`, `<domain>.repository.ts`, `<domain>.schema.ts` present under standard subfolders); flags drift. | ✗ |
 | 9 | `deps` | `jinn-web.config.json.cliVersion` vs installed CLI (nag if template conventions moved); duplicate-purpose packages (two toast libs, two date libs) from a small denylist. | ✗ |
+| 10 | `response-parsing` | Every `backendClient.get/post/put/patch` in `features/**/api/*.repository.ts` passes `{ parse }`. `delete` is exempt (empty envelope). Comments and string bodies are blanked before scanning — the repository's own doc comment quotes the anti-pattern it warns about, and an earlier version reported that documentation as a violation. | ✗ — the schema can't be inferred |
 
 Output style (Flutter parity):
 

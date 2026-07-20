@@ -3,7 +3,7 @@ import {
   defaultShouldDehydrateQuery,
   isServer,
 } from "@tanstack/react-query";
-import { isAbortError, isApiError } from "@/lib/http";
+import { isAbortError, isApiError, isParseError } from "@/lib/http";
 import { reportError } from "@/lib/reporting";
 
 /**
@@ -24,6 +24,9 @@ function makeQueryClient(): QueryClient {
         retry: (failureCount, error) => {
           if (isAbortError(error)) return false;
           if (isApiError(error) && error.statusCode < 500) return false;
+          // A response that failed its schema will fail identically on retry —
+          // the shape is wrong, not the connection.
+          if (isParseError(error)) return false;
           return failureCount < 1;
         },
       },

@@ -100,7 +100,7 @@ design-system reference page, and a green `npm run verify`.
 jinn-web domain shipments --role lager
 ```
 
-Nine files — repository, hooks, Zod schema, types, endpoints, list screen,
+Ten files — model, repository, hooks, Zod schema, types, endpoints, list screen,
 columns, form dialog, page — plus six wiring edits. Visit `/shipments` and
 there's a working paginated, searchable table with loading, empty and error
 states already handled.
@@ -263,10 +263,10 @@ jinn-web rename --name new-name --app-name "New Name"
 jinn-web doctor [--fix] [--json]
 ```
 
-Five checks: routes ↔ pages both ways, no inlined query keys, nav hrefs/labels/
-roles resolvable, the endpoint index complete, catalogs at parity. `--fix`
-repairs the mechanical ones. Exits `2` when it finds something, so CI can gate
-on it.
+Six checks: routes ↔ pages both ways, no inlined query keys, nav hrefs/labels/
+roles resolvable, the endpoint index complete, every repository validating its
+responses, catalogs at parity. `--fix` repairs the mechanical ones. Exits `2`
+when it finds something, so CI can gate on it.
 
 ### `guardrails`
 
@@ -300,6 +300,15 @@ handled. Pages dispatch declaratively with `<RoleScreens>`.
 `CommandMenu`, layout-matching skeletons — plus 11 form fields on react-hook-form
 and Zod, and helpers for dates, formatting, mutations and error reporting.
 
+**Models that actually check the wire.** Each domain owns a Zod schema with its
+type inferred from it, and repositories parse in *both* directions. A bare
+`backendClient.get<Order>(…)` is a claim TypeScript erases — when the backend
+renames a field you get `undefined` in a component and a crash somewhere
+unrelated. Here it fails at the boundary: `GET /orders → items.3.createdAt:
+expected string, received null`. List rows are a narrower `.pick()` of the full
+model, so a detail screen's new field never forces the backend to enrich every
+list endpoint. Unknown keys are stripped, so the backend adding fields is free.
+
 **Localization from the first line.** Typed dot-path keys, catalogs TypeScript
 keeps in sync, Zod messages as translation keys. The template contains zero
 hardcoded display strings.
@@ -318,7 +327,7 @@ src/
 │   ├── (auth)/               # signed-out screens
 │   ├── (app)/                # authed shell
 │   └── api/session/          # the only route handlers — auth lifecycle
-├── features/<role>/<domain>/ # components · api · services · validations · types
+├── features/<role>/<domain>/ # components · api · services · models · validations · types
 ├── components/               # ui (shadcn) · shared · form · layout · providers
 ├── lib/                      # http · auth · mutations · reporting · datetime · format
 ├── hooks/  i18n/  constants/  validations/  config/
@@ -330,6 +339,10 @@ src/
 ```
 component → services/ (React Query hook) → api/*.repository.ts → lib/http → backend
 ```
+
+`models/` holds the wire shapes (what the backend **returns**); `validations/`
+holds form input (what you **send**). They differ on purpose — a create payload
+has no `id`, and a wire model has no i18n message keys.
 
 **Placement rule.** A domain starts in its own role's folder and moves to
 `common/` when a *second* role genuinely needs it. Code shared by two domains in

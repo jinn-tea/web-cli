@@ -40,6 +40,10 @@ export interface DomainNames {
   constantName: string;
   /** Pascal, singular: "VehicleType". */
   Entity: string;
+  /** camel, singular: "vehicleType" — the model schema's variable name. */
+  entityCamel: string;
+  /** kebab, singular: "vehicle-type" — the model's FILE name. */
+  entityName: string;
   /** Title Case: "Vehicle Types". */
   titleName: string;
   role: string;
@@ -61,6 +65,8 @@ export function deriveNames(input: string, role: string): DomainNames {
     camelName: toCamel(name),
     constantName: toConstant(name),
     Entity: toPascal(toSingular(name)),
+    entityCamel: toCamel(toSingular(name)),
+    entityName: toKebab(toSingular(name)),
     titleName: toTitle(name),
     role,
     isCommon: role === "common",
@@ -75,6 +81,7 @@ export function domainFilePaths(names: DomainNames) {
   return {
     dir,
     constants: `${dir}/constants.ts`,
+    model: `${dir}/models/${names.entityName}.model.ts`,
     types: `${dir}/types/index.ts`,
     schema: `${dir}/validations/${names.name}.schema.ts`,
     repository: `${dir}/api/${names.name}.repository.ts`,
@@ -88,6 +95,7 @@ export function domainFilePaths(names: DomainNames) {
 
 const TEMPLATE_BY_TARGET = {
   constants: "constants.ts.eta",
+  model: "model.ts.eta",
   types: "types.ts.eta",
   schema: "schema.ts.eta",
   repository: "repository.ts.eta",

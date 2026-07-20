@@ -1,0 +1,56 @@
+import { z } from "zod";
+import { GENERIC_STATUSES } from "@/lib/badges";
+
+/**
+ * The <%= it.Entity %> MODEL — what the backend actually returns.
+ *
+ * The schema is the source of truth and the type is derived from it, never the
+ * other way round. Write the shape once and `z.infer` keeps the type honest;
+ * hand-writing an interface next to a parser is how the two silently drift.
+ *
+ * This is the INBOUND counterpart to `validations/` (which describes what a
+ * form sends). They differ on purpose — a create payload has no `id` and no
+ * `createdAt`, and the wire model has no i18n message keys.
+ *
+ * Repositories pass `<%= it.entityCamel %>Schema.parse` to the transport, so a
+ * response that doesn't match fails at the boundary naming the exact field,
+ * instead of putting `undefined` into a component and crashing somewhere else.
+ *
+ * When the backend is ahead of you, or a field is unreliable:
+ *   .optional()          tolerate a field that isn't rolled out everywhere yet
+ *   .nullable()          the backend genuinely sends null
+ *   .catch(fallback)     accept anything, fall back rather than fail
+ * Unknown keys are stripped by default, so the backend ADDING fields never
+ * breaks you — only a field you rely on changing shape does.
+ */
+export const <%= it.entityCamel %>Schema = z.object({
+  id: z.string(),
+  name: z.string(),
+  // Same const tuple the UI's tone map is keyed off, so a status the backend
+  // invents can't reach `GENERIC_STATUS_TONE` and render as undefined.
+  status: z.enum(GENERIC_STATUSES),
+  description: z.string().nullable().default(null),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export type <%= it.Entity %> = z.infer<typeof <%= it.entityCamel %>Schema>;
+
+/**
+ * What a LIST row needs — deliberately narrower than the full model.
+ *
+ * Model the response, not the entity. If every endpoint had to satisfy one
+ * shared shape, a single screen's new field would force the backend to enrich
+ * every list endpoint that returns a <%= it.Entity %>. Narrowing here is what keeps a
+ * frontend model from dictating backend responses.
+ *
+ * `.pick()` derives it, so a rename in the model above can't leave this stale.
+ */
+export const <%= it.entityCamel %>ListItemSchema = <%= it.entityCamel %>Schema.pick({
+  id: true,
+  name: true,
+  status: true,
+  createdAt: true,
+});
+
+export type <%= it.Entity %>ListItem = z.infer<typeof <%= it.entityCamel %>ListItemSchema>;

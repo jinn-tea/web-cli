@@ -6,10 +6,10 @@ import {
   readRefreshCookie,
   setRefreshCookie,
 } from "@/lib/auth/cookies";
-import type {
-  AuthUser,
-  BackendAuthPayload,
-  SessionPayload,
+import {
+  authUserSchema,
+  backendAuthPayloadSchema,
+  type SessionPayload,
 } from "@/lib/auth/types";
 import { isApiError } from "@/lib/http";
 import { serverRequest } from "@/lib/http/server-client";
@@ -40,14 +40,14 @@ export async function POST(request: Request) {
   }
 
   try {
-    const payload = await serverRequest<BackendAuthPayload>(
-      AUTH_ENDPOINTS.login,
-      {
-        method: "POST",
-        body: parsed.data,
-        acceptLanguage: request.headers.get("accept-language") ?? undefined,
-      },
-    );
+    const payload = await serverRequest(AUTH_ENDPOINTS.login, {
+      method: "POST",
+      body: parsed.data,
+      acceptLanguage: request.headers.get("accept-language") ?? undefined,
+      // Validate the auth payload: a login response missing `tokens` would
+      // otherwise set an `undefined` refresh cookie and fail much later.
+      parse: backendAuthPayloadSchema.parse,
+    });
 
     await setRefreshCookie(payload.tokens.refreshToken);
 
@@ -55,9 +55,10 @@ export async function POST(request: Request) {
     // returns tokens only.
     const user =
       payload.user ??
-      (await serverRequest<AuthUser>(AUTH_ENDPOINTS.me, {
+      (await serverRequest(AUTH_ENDPOINTS.me, {
         accessToken: payload.tokens.token,
         acceptLanguage: request.headers.get("accept-language") ?? undefined,
+        parse: authUserSchema.parse,
       }));
 
     const session: SessionPayload = {

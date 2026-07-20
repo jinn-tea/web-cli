@@ -1,6 +1,6 @@
 import { clientEnv } from "@/config/env";
 import { getLocale } from "@/i18n/locale-store";
-import { ApiError, NetworkError, isAbortError } from "./errors";
+import { ApiError, NetworkError, isAbortError, toParseError } from "./errors";
 import { tokenStore } from "./token-store";
 import type { ApiEnvelope } from "./types";
 
@@ -40,14 +40,23 @@ export function setOnSessionExpired(fn: () => void): void {
   onSessionExpired = fn;
 }
 
-export interface RequestOptions {
+export interface RequestOptions<T = unknown> {
   /** Attach the bearer token (default true). Public endpoints pass false. */
   auth?: boolean;
   /** Forward React Query's signal so a superseded request is aborted. */
   signal?: AbortSignal;
+  /**
+   * Validate the response before it reaches the caller — pass a schema's
+   * `.parse`, e.g. `{ parse: orderSchema.parse }`.
+   *
+   * Without it the generic parameter is only a claim, and a backend that
+   * renames a field hands you `undefined` instead of an error. Repositories
+   * should always supply this; `jinn-web doctor` flags the ones that don't.
+   */
+  parse?: (data: unknown) => T;
 }
 
-interface InternalOptions extends RequestOptions {
+interface InternalOptions<T = unknown> extends RequestOptions<T> {
   method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   body?: unknown;
   /** Guards against an infinite refresh → retry loop. */
@@ -79,8 +88,18 @@ function buildHeaders(auth: boolean, isFormData: boolean): HeadersInit {
   return headers;
 }
 
-async function request<T>(path: string, options: InternalOptions): Promise<T> {
-  const { method, body, auth = true, signal, _retried = false } = options;
+async function request<T>(
+  path: string,
+  options: InternalOptions<T>,
+): Promise<T> {
+  const {
+    method,
+    body,
+    auth = true,
+    signal,
+    parse,
+    _retried = false,
+  } = options;
 
   const isFormData =
     typeof FormData !== "undefined" && body instanceof FormData;
@@ -125,6 +144,17 @@ async function request<T>(path: string, options: InternalOptions): Promise<T> {
     }
 
     throw new ApiError(statusCode, message, envelope?.error?.timestamp);
+  }
+
+  // Validate the payload HERE, where the endpoint is still known — that's what
+  // lets the failure say `GET /orders → items.3.createdAt: expected string`
+  // instead of a bare schema dump with no indication of which call produced it.
+  if (parse) {
+    try {
+      return parse(envelope?.data);
+    } catch (error) {
+      throw toParseError(`${method} ${path}`, error);
+    }
   }
 
   return envelope?.data as T;
@@ -209,15 +239,15 @@ async function requestBlob(
 }
 
 export const backendClient = {
-  get: <T>(path: string, opts?: RequestOptions) =>
+  get: <T>(path: string, opts?: RequestOptions<T>) =>
     request<T>(path, { ...opts, method: "GET" }),
-  post: <T>(path: string, body?: unknown, opts?: RequestOptions) =>
+  post: <T>(path: string, body?: unknown, opts?: RequestOptions<T>) =>
     request<T>(path, { ...opts, method: "POST", body }),
-  put: <T>(path: string, body?: unknown, opts?: RequestOptions) =>
+  put: <T>(path: string, body?: unknown, opts?: RequestOptions<T>) =>
     request<T>(path, { ...opts, method: "PUT", body }),
-  patch: <T>(path: string, body?: unknown, opts?: RequestOptions) =>
+  patch: <T>(path: string, body?: unknown, opts?: RequestOptions<T>) =>
     request<T>(path, { ...opts, method: "PATCH", body }),
-  delete: <T>(path: string, body?: unknown, opts?: RequestOptions) =>
+  delete: <T>(path: string, body?: unknown, opts?: RequestOptions<T>) =>
     request<T>(path, { ...opts, method: "DELETE", body }),
   /** GET a file rather than an envelope — see `requestBlob`. */
   getBlob: (path: string, opts?: RequestOptions) =>

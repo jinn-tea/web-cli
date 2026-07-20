@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { z } from "zod";
 
 /**
  * The transport is the most load-bearing module in the app — every request
@@ -31,6 +32,7 @@ let setTokenRefresher: typeof import("./backend-client").setTokenRefresher;
 let tokenStore: typeof import("./token-store").tokenStore;
 let ApiError: typeof import("./errors").ApiError;
 let NetworkError: typeof import("./errors").NetworkError;
+let ParseError: typeof import("./errors").ParseError;
 
 beforeEach(async () => {
   // The refresher and the in-flight refresh promise are module-level state, so
@@ -50,6 +52,7 @@ beforeEach(async () => {
   tokenStore = tokens.tokenStore;
   ApiError = errors.ApiError;
   NetworkError = errors.NetworkError;
+  ParseError = errors.ParseError;
   tokenStore.clear();
 });
 
@@ -197,5 +200,111 @@ describe("backendClient", () => {
       statusCode: 401,
     });
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+});
+
+/**
+ * Response validation.
+ *
+ * `backendClient.get<Order>(…)` without a `parse` is a CLAIM, not a check —
+ * TypeScript erases it, so a backend that renames a field hands the app
+ * `undefined` and the failure surfaces somewhere unrelated. These pin the
+ * behaviour that makes the type true at runtime.
+ */
+describe("response parsing", () => {
+  const orderSchema = z.object({
+    id: z.string(),
+    total: z.number(),
+    createdAt: z.string(),
+  });
+
+  it("returns the parsed value when the response matches", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValue(
+          ENVELOPE_OK({ id: "1", total: 42, createdAt: "2026-01-01" }),
+        ),
+    );
+
+    await expect(
+      backendClient.get("/orders/1", { parse: orderSchema.parse }),
+    ).resolves.toEqual({ id: "1", total: 42, createdAt: "2026-01-01" });
+  });
+
+  it("throws a ParseError naming the endpoint and the field", async () => {
+    // `total` arrives as a string — the exact drift that silently produces NaN
+    // in a currency formatter several layers away.
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValue(
+          ENVELOPE_OK({ id: "1", total: "42", createdAt: "2026-01-01" }),
+        ),
+    );
+
+    const error = await backendClient
+      .get("/orders/1", { parse: orderSchema.parse })
+      .catch((e: unknown) => e);
+
+    expect(error).toBeInstanceOf(ParseError);
+    expect((error as InstanceType<typeof ParseError>).endpoint).toBe(
+      "GET /orders/1",
+    );
+    expect((error as InstanceType<typeof ParseError>).message).toContain(
+      "total",
+    );
+  });
+
+  it("reports the index of the offending row in a list", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        ENVELOPE_OK({
+          items: [
+            { id: "1", total: 1, createdAt: "x" },
+            { id: "2", total: null, createdAt: "x" },
+          ],
+        }),
+      ),
+    );
+
+    const error = await backendClient
+      .get("/orders", {
+        parse: z.object({ items: z.array(orderSchema) }).parse,
+      })
+      .catch((e: unknown) => e);
+
+    expect((error as InstanceType<typeof ParseError>).message).toContain(
+      "items.1.total",
+    );
+  });
+
+  it("ignores fields the schema doesn't declare", async () => {
+    // The backend ADDING a field must never break a client — this is why
+    // schema-per-response doesn't force the backend into lockstep releases.
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        ENVELOPE_OK({
+          id: "1",
+          total: 42,
+          createdAt: "2026-01-01",
+          somethingNew: true,
+        }),
+      ),
+    );
+
+    await expect(
+      backendClient.get("/orders/1", { parse: orderSchema.parse }),
+    ).resolves.toEqual({ id: "1", total: 42, createdAt: "2026-01-01" });
+  });
+
+  it("leaves the response untouched when no parse is given", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(ENVELOPE_OK({ any: 1 })));
+
+    await expect(backendClient.get("/legacy")).resolves.toEqual({ any: 1 });
   });
 });

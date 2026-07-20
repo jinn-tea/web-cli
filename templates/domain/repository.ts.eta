@@ -2,8 +2,8 @@
 <% } %>import {
   backendClient,
   normalizePagination,
+  paginatedResponseSchema,
   type Paginated,
-  type RawPagination,
   type RequestOptions,
 } from "@/lib/http";
 import { <%= it.camelName %>Endpoints } from "@/<%= it.featurePath %>/constants";
@@ -13,14 +13,26 @@ import {
   type Create<%= it.Entity %>Input,
   type Update<%= it.Entity %>Input,
 } from "@/<%= it.featurePath %>/validations/<%= it.name %>.schema";
-import type { <%= it.Entity %> } from "@/<%= it.featurePath %>/types";
+import {
+  <%= it.entityCamel %>Schema,
+  <%= it.entityCamel %>ListItemSchema,
+  type <%= it.Entity %>,
+  type <%= it.Entity %>ListItem,
+} from "@/<%= it.featurePath %>/models/<%= it.entityName %>.model";
 
 /**
  * The repository — this domain's boundary with the backend.
  *
- * It is PURE: validate input with the schema → call the transport → return a
- * typed domain object. No React, no toasts, no token handling, no caching.
- * That's what makes it trivially testable and callable from anywhere.
+ * It is PURE: validate input with the schema → call the transport → parse the
+ * response into a typed domain object. No React, no toasts, no token handling,
+ * no caching. That's what makes it trivially testable and callable from
+ * anywhere.
+ *
+ * Validation runs in BOTH directions, and the inbound half is the one usually
+ * skipped: a bare `backendClient.get<<%= it.Entity %>>(…)` is a claim about the response
+ * that nothing verifies, so a renamed backend field arrives as `undefined` in a
+ * component instead of an error here. Passing `parse` makes the type true at
+ * runtime — `jinn-web doctor` flags any call that omits it.
  *
  * Note `signal` is threaded through every read. Without it React Query cannot
  * actually abort a superseded request, so a slow response from an old search
@@ -33,11 +45,14 @@ interface ListParams {
   sort?: string;
 }
 
-/** Raw list shape from the backend (snake_case pagination). */
-interface Raw<%= it.Name %>List {
-  items: <%= it.Entity %>[];
-  pagination: RawPagination;
-}
+/**
+ * The list response: rows plus the backend's snake_case pagination block.
+ * Built from the LIST-ROW schema, not the full model — see the model file for
+ * why those are deliberately different shapes.
+ */
+const <%= it.camelName %>ListResponseSchema = paginatedResponseSchema(
+  <%= it.entityCamel %>ListItemSchema,
+);
 
 function buildQuery(params: ListParams): string {
   const search = new URLSearchParams();
@@ -53,16 +68,16 @@ export const <%= it.camelName %>Repository = {
     <% if (it.groupedEndpoints) { %>group: RoleGroup,
     <% } %>params: ListParams = {},
     opts?: RequestOptions,
-  ): Promise<Paginated<<%= it.Entity %>>> {
-    const raw = await backendClient.get<Raw<%= it.Name %>List>(
+  ): Promise<Paginated<<%= it.Entity %>ListItem>> {
+    const raw = await backendClient.get(
       `${<%= it.camelName %>Endpoints<% if (it.groupedEndpoints) { %>(group)<% } %>.list}${buildQuery(params)}`,
-      opts,
+      { ...opts, parse: <%= it.camelName %>ListResponseSchema.parse },
     );
     // snake_case → camelCase happens HERE, at the edge, so no component ever
     // sees `current_page`.
     return {
-      items: raw.items ?? [],
-      pagination: normalizePagination(raw.pagination ?? {}),
+      items: raw.items,
+      pagination: normalizePagination(raw.pagination),
     };
   },
 
@@ -71,9 +86,9 @@ export const <%= it.camelName %>Repository = {
     <% } %>id: string,
     opts?: RequestOptions,
   ): Promise<<%= it.Entity %>> {
-    return backendClient.get<<%= it.Entity %>>(
+    return backendClient.get(
       <%= it.camelName %>Endpoints<% if (it.groupedEndpoints) { %>(group)<% } %>.detail(id),
-      opts,
+      { ...opts, parse: <%= it.entityCamel %>Schema.parse },
     );
   },
 
@@ -85,10 +100,10 @@ export const <%= it.camelName %>Repository = {
     // Parse before sending: the form validated already, but a repository that
     // trusts its caller is one refactor away from posting garbage.
     const body = create<%= it.Entity %>Schema.parse(input);
-    return backendClient.post<<%= it.Entity %>>(
+    return backendClient.post(
       <%= it.camelName %>Endpoints<% if (it.groupedEndpoints) { %>(group)<% } %>.create,
       body,
-      opts,
+      { ...opts, parse: <%= it.entityCamel %>Schema.parse },
     );
   },
 
@@ -99,16 +114,19 @@ export const <%= it.camelName %>Repository = {
     opts?: RequestOptions,
   ): Promise<<%= it.Entity %>> {
     const body = update<%= it.Entity %>Schema.parse(input);
-    return backendClient.patch<<%= it.Entity %>>(
+    return backendClient.patch(
       <%= it.camelName %>Endpoints<% if (it.groupedEndpoints) { %>(group)<% } %>.update(id),
       body,
-      opts,
+      { ...opts, parse: <%= it.entityCamel %>Schema.parse },
     );
   },
 
   remove(<% if (it.groupedEndpoints) { %>group: RoleGroup, <% } %>id: string, opts?: RequestOptions): Promise<void> {
+    // No `parse`: a delete answers with an empty envelope, so there is no shape
+    // to check. The absence is deliberate — doctor allows it for `delete`.
     return backendClient.delete<void>(
       <%= it.camelName %>Endpoints<% if (it.groupedEndpoints) { %>(group)<% } %>.remove(id),
+      undefined,
       opts,
     );
   },

@@ -5,10 +5,10 @@ import {
   readRefreshCookie,
   setRefreshCookie,
 } from "@/lib/auth/cookies";
-import type {
-  AuthUser,
-  BackendAuthPayload,
-  SessionPayload,
+import {
+  authUserSchema,
+  backendAuthPayloadSchema,
+  type SessionPayload,
 } from "@/lib/auth/types";
 import { isApiError } from "@/lib/http";
 import { serverRequest } from "@/lib/http/server-client";
@@ -36,10 +36,12 @@ export async function POST(request: Request) {
   const acceptLanguage = request.headers.get("accept-language") ?? undefined;
 
   try {
-    const payload = await serverRequest<BackendAuthPayload>(
-      AUTH_ENDPOINTS.refresh,
-      { method: "POST", body: { refreshToken }, acceptLanguage },
-    );
+    const payload = await serverRequest(AUTH_ENDPOINTS.refresh, {
+      method: "POST",
+      body: { refreshToken },
+      acceptLanguage,
+      parse: backendAuthPayloadSchema.parse,
+    });
 
     // Rotate: a refresh token that's used once and replaced limits the damage
     // if an old one ever leaks.
@@ -49,9 +51,10 @@ export async function POST(request: Request) {
     // only when needed.
     const user =
       payload.user ??
-      (await serverRequest<AuthUser>(AUTH_ENDPOINTS.me, {
+      (await serverRequest(AUTH_ENDPOINTS.me, {
         accessToken: payload.tokens.token,
         acceptLanguage,
+        parse: authUserSchema.parse,
       }));
 
     const session: SessionPayload = {

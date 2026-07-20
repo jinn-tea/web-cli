@@ -19,7 +19,7 @@ import {
   useCreate<%= it.Entity %>,
   useUpdate<%= it.Entity %>,
 } from "@/<%= it.featurePath %>/services/use-<%= it.name %>";
-import type { <%= it.Entity %> } from "@/<%= it.featurePath %>/types";
+import type { <%= it.Entity %>ListItem } from "@/<%= it.featurePath %>/types";
 
 /**
  * Create/edit dialog. One component serves both modes — an "edit" dialog is the
@@ -33,8 +33,12 @@ export function <%= it.Entity %>FormDialog({
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Present = edit mode. */
-  item?: <%= it.Entity %> | null;
+  /**
+   * Present = edit mode. Typed as the LIST row because that's what the table
+   * hands over; a full <%= it.Entity %> satisfies it too, since the list shape is a
+   * `.pick()` of the model.
+   */
+  item?: <%= it.Entity %>ListItem | null;
 }) {
   const t = useTranslations();
 <% if (it.groupedEndpoints) { %>  const group = useRoleGroup();
