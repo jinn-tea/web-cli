@@ -22,10 +22,7 @@ const serverSchema = z.object({
    */
   BACKEND_API_URL: z.string().min(1).optional(),
   /** Name of the httpOnly cookie holding the refresh token. */
-  SESSION_COOKIE_NAME: z
-    .string()
-    .min(1)
-    .default(DEFAULT_SESSION_COOKIE_NAME),
+  SESSION_COOKIE_NAME: z.string().min(1).default(DEFAULT_SESSION_COOKIE_NAME),
 });
 
 const clientSchema = z.object({
@@ -34,6 +31,13 @@ const clientSchema = z.object({
   /** Display name, used in metadata and the app shell. */
   NEXT_PUBLIC_APP_NAME: z.string().min(1).default("Codeable App"),
 });
+
+/**
+ * True outside production. Next inlines `process.env.NODE_ENV` on both server
+ * and client, so this is the sanctioned way for app code to gate dev-only
+ * tooling without touching `process.env` itself.
+ */
+export const isDevelopment = process.env.NODE_ENV !== "production";
 
 export const serverEnv = serverSchema.parse(process.env);
 

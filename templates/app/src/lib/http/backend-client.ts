@@ -1,6 +1,7 @@
 import { clientEnv } from "@/config/env";
 import { getLocale } from "@/i18n/locale-store";
 import { ApiError, NetworkError, isAbortError, toParseError } from "./errors";
+import { isNetLogEnabled, type NetErrorKind, recordNetCall } from "./net-log";
 import { tokenStore } from "./token-store";
 import type { ApiEnvelope } from "./types";
 
@@ -88,6 +89,44 @@ function buildHeaders(auth: boolean, isFormData: boolean): HeadersInit {
   return headers;
 }
 
+/**
+ * Feed one call into the DEV-ONLY network inspector (see `lib/http/net-log`).
+ *
+ * A no-op in production (and on the server), so it stays out of the hot path
+ * and the prod bundle. FormData is summarised rather than stored — we want the
+ * field names in the panel, not a retained multipart blob.
+ */
+function logCall(args: {
+  method: string;
+  path: string;
+  startedAt: number;
+  startPerf: number;
+  status: number | null;
+  ok: boolean;
+  requestBody?: unknown;
+  response: unknown;
+  errorKind?: NetErrorKind;
+  errorMessage?: string;
+}): void {
+  if (!isNetLogEnabled) return;
+  const { requestBody } = args;
+  recordNetCall({
+    method: args.method,
+    path: args.path,
+    status: args.status,
+    ok: args.ok,
+    durationMs: Math.round(performance.now() - args.startPerf),
+    startedAt: args.startedAt,
+    requestBody:
+      typeof FormData !== "undefined" && requestBody instanceof FormData
+        ? `FormData { ${[...requestBody.keys()].join(", ")} }`
+        : requestBody,
+    response: args.response,
+    errorKind: args.errorKind,
+    errorMessage: args.errorMessage,
+  });
+}
+
 async function request<T>(
   path: string,
   options: InternalOptions<T>,
@@ -104,6 +143,9 @@ async function request<T>(
   const isFormData =
     typeof FormData !== "undefined" && body instanceof FormData;
 
+  const startedAt = Date.now();
+  const startPerf = performance.now();
+
   let res: Response;
   try {
     res = await fetch(`${BASE_URL}${path}`, {
@@ -117,7 +159,20 @@ async function request<T>(
       signal,
     });
   } catch (error) {
+    // Aborts are React Query cancelling a superseded request — not a failure.
     if (isAbortError(error)) throw error;
+    logCall({
+      method,
+      path,
+      startedAt,
+      startPerf,
+      status: null,
+      ok: false,
+      requestBody: body,
+      response: null,
+      errorKind: "network",
+      errorMessage: "Can't reach the server",
+    });
     throw new NetworkError();
   }
 
@@ -130,6 +185,19 @@ async function request<T>(
     const statusCode = envelope?.statusCode ?? res.status;
     const message =
       envelope?.error?.message ?? res.statusText ?? "Request failed";
+
+    logCall({
+      method,
+      path,
+      startedAt,
+      startPerf,
+      status: statusCode,
+      ok: false,
+      requestBody: body,
+      response: envelope,
+      errorKind: "api",
+      errorMessage: message,
+    });
 
     // Access token expired → refresh once, then replay the original request.
     if (statusCode === 401 && auth && !_retried && refresher) {
@@ -151,12 +219,46 @@ async function request<T>(
   // instead of a bare schema dump with no indication of which call produced it.
   if (parse) {
     try {
-      return parse(envelope?.data);
+      const parsed = parse(envelope?.data);
+      logCall({
+        method,
+        path,
+        startedAt,
+        startPerf,
+        status: envelope?.statusCode ?? res.status,
+        ok: true,
+        requestBody: body,
+        response: envelope?.data,
+      });
+      return parsed;
     } catch (error) {
-      throw toParseError(`${method} ${path}`, error);
+      const parseError = toParseError(`${method} ${path}`, error);
+      logCall({
+        method,
+        path,
+        startedAt,
+        startPerf,
+        status: envelope?.statusCode ?? res.status,
+        ok: false,
+        requestBody: body,
+        response: envelope?.data,
+        errorKind: "parse",
+        errorMessage: parseError.message,
+      });
+      throw parseError;
     }
   }
 
+  logCall({
+    method,
+    path,
+    startedAt,
+    startPerf,
+    status: envelope?.statusCode ?? res.status,
+    ok: true,
+    requestBody: body,
+    response: envelope?.data,
+  });
   return envelope?.data as T;
 }
 
@@ -193,6 +295,9 @@ async function requestBlob(
 ): Promise<BlobResponse> {
   const { auth = true, signal, _retried = false } = options;
 
+  const startedAt = Date.now();
+  const startPerf = performance.now();
+
   let res: Response;
   try {
     res = await fetch(`${BASE_URL}${path}`, {
@@ -202,6 +307,17 @@ async function requestBlob(
     });
   } catch (error) {
     if (isAbortError(error)) throw error;
+    logCall({
+      method: "GET",
+      path,
+      startedAt,
+      startPerf,
+      status: null,
+      ok: false,
+      response: null,
+      errorKind: "network",
+      errorMessage: "Can't reach the server",
+    });
     throw new NetworkError();
   }
 
@@ -219,6 +335,18 @@ async function requestBlob(
     const message =
       envelope?.error?.message ?? res.statusText ?? "Request failed";
 
+    logCall({
+      method: "GET",
+      path,
+      startedAt,
+      startPerf,
+      status: statusCode,
+      ok: false,
+      response: envelope,
+      errorKind: "api",
+      errorMessage: message,
+    });
+
     if (statusCode === 401 && auth && !_retried && refresher) {
       try {
         await runRefresh();
@@ -232,10 +360,18 @@ async function requestBlob(
     throw new ApiError(statusCode, message, envelope?.error?.timestamp);
   }
 
-  return {
-    blob: await res.blob(),
-    filename: filenameFrom(res.headers.get("content-disposition")),
-  };
+  const blob = await res.blob();
+  const filename = filenameFrom(res.headers.get("content-disposition"));
+  logCall({
+    method: "GET",
+    path,
+    startedAt,
+    startPerf,
+    status: res.status,
+    ok: true,
+    response: `${blob.type || "binary"} · ${blob.size} bytes${filename ? ` · ${filename}` : ""}`,
+  });
+  return { blob, filename };
 }
 
 export const backendClient = {

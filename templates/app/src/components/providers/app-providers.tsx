@@ -1,12 +1,30 @@
 "use client";
 
 import { QueryClientProvider } from "@tanstack/react-query";
+import dynamic from "next/dynamic";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { isDevelopment } from "@/config/env";
 import { bootstrapSession, initAuthTransport } from "@/lib/auth";
 import { attachQueryErrorReporting, getQueryClient } from "@/lib/query-client";
+
+/**
+ * Dev tooling (the Chucker-style Network Inspector), loaded only outside
+ * production. In prod `isDevelopment` is false, so the dynamic import is never
+ * invoked and its chunk is never fetched.
+ */
+const DevTools = isDevelopment
+  ? dynamic(
+      () => import("@/components/dev/dev-tools").then((m) => m.DevTools),
+      {
+        ssr: false,
+      },
+    )
+  : function NoDevTools() {
+      return null;
+    };
 
 /**
  * THE single client boundary of the app, mounted once by the root layout.
@@ -38,6 +56,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
         <TooltipProvider delayDuration={200}>
           {children}
           <Toaster position="top-right" richColors closeButton />
+          <DevTools />
         </TooltipProvider>
       </NuqsAdapter>
     </QueryClientProvider>
