@@ -52,8 +52,27 @@ export function getQueryClient(): QueryClient {
   return browserQueryClient;
 }
 
-/** Surface unexpected query failures to the reporting seam (not the user). */
+/**
+ * Clients already carrying a reporting subscriber.
+ *
+ * A WeakSet, not a boolean: the server makes a fresh client per request, and a
+ * module-level flag would leave every request after the first unsubscribed.
+ */
+const reportingAttached = new WeakSet<QueryClient>();
+
+/**
+ * Surface unexpected query failures to the reporting seam (not the user).
+ *
+ * Idempotent on purpose. The browser client is a singleton while the call site
+ * is a `useState` initializer, which React Strict Mode deliberately invokes
+ * twice in development — so without this guard the same client collects two
+ * subscribers and every failure is reported twice. That reads as a retry bug
+ * in the logs, and it only reproduces in dev.
+ */
 export function attachQueryErrorReporting(client: QueryClient): void {
+  if (reportingAttached.has(client)) return;
+  reportingAttached.add(client);
+
   client.getQueryCache().subscribe((event) => {
     if (event.type === "updated" && event.query.state.status === "error") {
       const error = event.query.state.error;

@@ -158,15 +158,24 @@ export function rewritePackageJson(
 }
 
 /**
- * Rewrite the CLAUDE.md heading and the role list so the architecture guide
- * describes THIS project rather than the template.
+ * Rewrite the CLAUDE.md heading and the project-facts line so the architecture
+ * guide describes THIS project rather than the template.
+ *
+ * The facts go on their own line rather than being spliced into a prose
+ * sentence. A sentence has to be grammatical in both shapes, and the earlier
+ * version wasn't: a roleless project got "roles here:  (plus `common`)" — an
+ * empty list inside a clause describing machinery it doesn't have. The
+ * role-conditional prose is handled by the role-block markers in the template;
+ * this only fills in the names.
  */
 export function rewriteClaudeMd(
   source: string,
   options: { appName: string; roles: readonly string[]; locales: readonly string[] },
 ): string {
-  const roleList = options.roles.map((role) => `\`${role}\``).join(" · ");
   const localeList = options.locales.map((locale) => `\`${locale}\``).join(", ");
+  const roleFacts = options.roles.length
+    ? `roles ${options.roles.map((role) => `\`${role}\``).join(" · ")} (plus \`common\`)`
+    : "a single-audience app, with no roles";
 
   return source
     .replace(
@@ -178,8 +187,8 @@ export function rewriteClaudeMd(
       `Next.js **16** (App Router) app for **${options.appName}**, built on`,
     )
     .replace(
-      /^2\. \*\*Role-first, then domain\.\*\* `src\/features\/<role>\/<domain>\/`\./m,
-      `2. **Role-first, then domain.** \`src/features/<role>/<domain>/\` — roles here: ${roleList} (plus \`common\`). Locales: ${localeList}.`,
+      /^\*\*This project\*\* — .*$/m,
+      `**This project** — ${roleFacts}. Locales: ${localeList} (the first is the source catalog).`,
     );
 }
 

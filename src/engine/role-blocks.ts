@@ -26,13 +26,15 @@
  */
 
 /**
- * Markers appear in two comment styles, because JSX has no line comments:
- * `// jinn-web:role-only:start` in code, `{/* jinn-web:role-only:start *\/}` in
- * markup. Both must be recognised or a marked JSX region silently survives into
- * a roleless project and fails to compile.
+ * Markers appear in three comment styles, because no single one is valid
+ * everywhere: `// jinn-web:role-only:start` in code, `{/* … *\/}` in JSX (which
+ * has no line comments), and `<!-- … -->` in Markdown. All three must be
+ * recognised or a marked region silently survives into a roleless project —
+ * failing to compile in the JSX case, and quietly describing an architecture
+ * the project doesn't have in the Markdown one.
  */
-const MARK = String.raw`(?:\/\/|\{\/\*)\s*jinn-web:`;
-const END = String.raw`\s*(?:\*\/\})?`;
+const MARK = String.raw`(?:\/\/|\{\/\*|<!--)\s*jinn-web:`;
+const END = String.raw`\s*(?:\*\/\}|-->)?`;
 
 const ROLE_ONLY = new RegExp(
   `[ \\t]*${MARK}role-only:start${END}[\\s\\S]*?${MARK}role-only:end${END}[ \\t]*\\n?`,
@@ -43,17 +45,33 @@ const ROLELESS_BLOCK = new RegExp(
   "g",
 );
 
+/**
+ * Uncomment a roleless block's body.
+ *
+ * Code bodies are commented line by line (`// …`). Markdown has no line
+ * comment, so a Markdown body is wrapped in ONE `<!-- … -->` block instead —
+ * which means activating it is deleting the two fence lines, not stripping a
+ * prefix from each line.
+ */
+function uncomment(body: string): string {
+  const lines = body.split("\n");
+  const first = lines.findIndex((line) => line.trim() !== "");
+  const last = lines.findLastIndex((line) => line.trim() !== "");
+
+  if (first !== -1 && lines[first]!.trim() === "<!--" && lines[last]!.trim() === "-->") {
+    return lines.filter((_line, index) => index !== first && index !== last).join("\n");
+  }
+
+  return lines.map((line) => line.replace(/^(\s*)\/\/ ?/, "$1")).join("\n");
+}
+
 /** Produce the ROLELESS shape: drop role-only regions, activate roleless ones. */
 export function applyRoleless(source: string): string {
   return source
     .replace(ROLE_ONLY, "")
     .replace(ROLELESS_BLOCK, (_match, body: string) =>
-      body
-        .split("\n")
-        .map((line) => line.replace(/^(\s*)\/\/ ?/, "$1"))
-        .join("\n")
-        // Keep the trailing newline the block consumed.
-        .replace(/\n?$/, "\n"),
+      // Keep the trailing newline the block consumed.
+      uncomment(body).replace(/\n?$/, "\n"),
     );
 }
 

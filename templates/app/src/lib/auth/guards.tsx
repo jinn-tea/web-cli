@@ -17,8 +17,9 @@ import { useSessionStatus } from "./hooks";
  * authorization boundary and re-checks every request. Never rely on a guard to
  * protect data — it only stops a user from staring at a broken screen.
  *
- * `middleware.ts` does the optimistic cookie-level redirect before this even
- * mounts; these handle the authoritative, post-session-resolution case.
+ * `proxy.ts` (Next 16's renamed Middleware) does the optimistic cookie-level
+ * redirect before this even mounts; these handle the authoritative,
+ * post-session-resolution case.
  */
 
 export function RequireAuth({ children }: { children: React.ReactNode }) {

@@ -8,6 +8,7 @@ import {
   removeNavItem,
   removeRegistryEntry,
   replaceBrandRamp,
+  rewriteClaudeMd,
   rewritePackageJson,
   rewriteRolesNamespace,
   seedLocaleCatalog,
@@ -221,5 +222,45 @@ describe("identifierFor", () => {
   it("makes a locale code usable as a JS identifier", () => {
     expect(identifierFor("en")).toBe("en");
     expect(identifierFor("pt-BR")).toBe("ptBR");
+  });
+});
+
+describe("rewriteClaudeMd", () => {
+  const guide = [
+    "# Architecture Guide",
+    "",
+    "Next.js **16** (App Router) app built on the Codeable web architecture.",
+    "",
+    "**This project** — see `jinn-web.config.json` for the roles and locales it was generated with.",
+  ].join("\n");
+
+  it("names the project and lists its roles", () => {
+    const result = rewriteClaudeMd(guide, {
+      appName: "Acme",
+      roles: ["admin", "member"],
+      locales: ["en", "fr"],
+    });
+
+    expect(result).toContain("# Acme — Architecture Guide");
+    expect(result).toContain("app for **Acme**");
+    expect(result).toContain("roles `admin` · `member` (plus `common`)");
+    expect(result).toContain("Locales: `en`, `fr`");
+  });
+
+  /**
+   * The facts line used to be spliced into the role-first principle, which for
+   * a roleless project produced "roles here:  (plus `common`)" — an empty list
+   * inside a clause about machinery the project doesn't have.
+   */
+  it("says a roleless project has no roles, and says it grammatically", () => {
+    const result = rewriteClaudeMd(guide, {
+      appName: "Acme",
+      roles: [],
+      locales: ["en"],
+    });
+
+    expect(result).toContain("a single-audience app, with no roles");
+    expect(result).not.toContain("(plus `common`)");
+    expect(result).not.toContain("roles  ");
   });
 });

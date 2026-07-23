@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import {
   DEFAULT_AUTHED_ROUTE,
   DEFAULT_GUEST_ROUTE,
+  DEFAULT_SESSION_COOKIE_NAME,
   PUBLIC_ROUTES,
 } from "@/constants";
 
@@ -22,7 +23,8 @@ import {
  *  - no trust: a cookie can be stale or forged. Real authorization happens in
  *    the backend on every request; this only avoids showing a doomed screen.
  */
-const SESSION_COOKIE = process.env.SESSION_COOKIE_NAME ?? "session";
+const SESSION_COOKIE =
+  process.env.SESSION_COOKIE_NAME ?? DEFAULT_SESSION_COOKIE_NAME;
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;

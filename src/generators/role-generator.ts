@@ -11,6 +11,7 @@ import {
   removeObjectProperty,
 } from "../engine/codemods.js";
 import { formatSource } from "../engine/format.js";
+import { refreshGuardrailConfig } from "../engine/guardrails.js";
 import { toPascal, toTitle } from "../engine/naming.js";
 import { listDomains, writeConfig, type Project } from "../engine/project.js";
 import { renderString, templatesRoot } from "../engine/template.js";
@@ -215,7 +216,13 @@ async function addRoleInner(
   );
   wired.push("dashboard page dispatch");
 
-  // 5. Record it, so generators and doctor agree on what exists.
+  // 5. Refresh the import-boundary zones. They are generated from the role
+  //    list, so a new role otherwise gets no zone — and nothing would say so.
+  if (await refreshGuardrailConfig(root, roles)) {
+    wired.push("eslint.config.mjs boundary zones");
+  }
+
+  // 6. Record it, so generators and doctor agree on what exists.
   await writeConfig(root, { ...config, roles });
   wired.push("jinn-web.config.json");
 
@@ -280,6 +287,12 @@ export async function removeRole(
     ),
   );
   removed.push("dashboard page dispatch");
+
+  // The removed role still had a boundary zone naming it, and every other
+  // role's zone still forbids importing it.
+  if (await refreshGuardrailConfig(root, roles)) {
+    removed.push("eslint.config.mjs boundary zones");
+  }
 
   await writeConfig(root, { ...config, roles });
   await clearRouteTypeCache(root);

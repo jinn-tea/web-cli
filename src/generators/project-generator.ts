@@ -3,6 +3,7 @@ import path from "node:path";
 import { buildBrandRamp } from "../engine/brand.js";
 import { commitFresh } from "../engine/fs-plan.js";
 import { formatSource } from "../engine/format.js";
+import { renderGuardrailConfig } from "../engine/guardrails.js";
 import { applyRoleFirst, applyRoleless, hasRoleBlocks } from "../engine/role-blocks.js";
 import { toKebab, toPascal, toTitle } from "../engine/naming.js";
 import { CONFIG_FILE, type ProjectConfig } from "../engine/project.js";
@@ -81,6 +82,8 @@ function isExcluded(relativePath: string, hasRoles: boolean): boolean {
     normalized === "src/i18n/index.ts" ||
     normalized === ".env.example" ||
     normalized === "README.md" ||
+    // Regenerated so the import-boundary zones name THIS project's roles.
+    normalized === "eslint.config.mjs" ||
     // Template-repo bookkeeping.
     normalized === "jinn-web.config.json" ||
     normalized === ".env.local" ||
@@ -192,6 +195,20 @@ export async function generateProject(options: CreateOptions): Promise<void> {
     await write("src/app/(app)/dashboard/page.tsx", "dashboard-page.tsx.eta");
     await write(".env.example", "env.example.eta");
     await write("README.md", "README.md.eta");
+
+    // The guardrail pack is GENERATED, not copied, because its import-boundary
+    // zones name the project's actual roles — a copied config can only carry
+    // the template's. Copying it also meant the boundary rules the config's own
+    // header promised ("shared layers never import features") shipped absent,
+    // which is how the layering erodes without anyone noticing.
+    const eslintConfigPath = path.join(staging, "eslint.config.mjs");
+    await fs.outputFile(
+      eslintConfigPath,
+      await formatSource(
+        renderGuardrailConfig({ roles, severity: "error", withQuery: true }),
+        eslintConfigPath,
+      ),
+    );
 
     // Local env so `dev` works immediately after scaffolding.
     await write(".env.local", "env.example.eta");

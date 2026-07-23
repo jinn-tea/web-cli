@@ -28,5 +28,5 @@ export const DEFAULT_AUTHED_ROUTE = APP_ROUTES.dashboard;
 /** Where an unauthenticated visitor is sent. */
 export const DEFAULT_GUEST_ROUTE = AUTH_ROUTES.login;
 
-/** Routes reachable without a session (checked by middleware). */
+/** Routes reachable without a session (checked by `proxy.ts`). */
 export const PUBLIC_ROUTES: readonly string[] = Object.values(AUTH_ROUTES);

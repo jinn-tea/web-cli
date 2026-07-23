@@ -11,3 +11,6 @@ test-results/
 playwright-report/
 # scratch projects generated while testing the CLI
 /*-app/
+
+# local handoff notes for future agents — not for the repo
+docs/handoff.md

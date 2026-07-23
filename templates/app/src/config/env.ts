@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { DEFAULT_SESSION_COOKIE_NAME } from "@/constants/session";
 
 /**
  * Typed, validated environment variables.
@@ -21,7 +22,10 @@ const serverSchema = z.object({
    */
   BACKEND_API_URL: z.string().min(1).optional(),
   /** Name of the httpOnly cookie holding the refresh token. */
-  SESSION_COOKIE_NAME: z.string().min(1).default("session"),
+  SESSION_COOKIE_NAME: z
+    .string()
+    .min(1)
+    .default(DEFAULT_SESSION_COOKIE_NAME),
 });
 
 const clientSchema = z.object({
